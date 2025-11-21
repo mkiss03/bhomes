@@ -756,12 +756,10 @@
 
     <!-- Dynamic Content Loader -->
     <script>
-        // Dynamic Content Loader - with time-based cache invalidation
+        // Dynamic Content Loader - NO CACHE for instant updates
         class ContentLoader {
             constructor() {
-                this.cache = new Map();
                 this.loading = false;
-                this.cacheDuration = 5 * 60 * 1000; // 5 minutes in milliseconds
             }
 
             async loadPageContent(page) {
@@ -770,26 +768,9 @@
                 try {
                     this.loading = true;
 
-                    // Check if cache exists and is still valid
-                    if (this.cache.has(page)) {
-                        const cached = this.cache.get(page);
-                        const now = Date.now();
-                        if (now - cached.timestamp < this.cacheDuration) {
-                            this.applyContent(cached.content);
-                            return;
-                        } else {
-                            // Cache expired, remove it
-                            this.cache.delete(page);
-                        }
-                    }
-
                     const response = await fetch(`api/get_content.php?page=${page}&grouped=true`);
                     if (response.ok) {
                         const content = await response.json();
-                        this.cache.set(page, {
-                            content: content,
-                            timestamp: Date.now()
-                        });
                         this.applyContent(content);
                     } else {
                         console.warn(`Failed to load content for page: ${page}`);
@@ -1225,16 +1206,20 @@
             return card;
         }
 
-        document.getElementById('type').addEventListener('change', function() {
-    const selectedValue = this.value;
-    
-    if (selectedValue === 'new_build_villa' || selectedValue === 'new_build_apartment') {
-        window.location.href = `new-build-properties.php?type=${encodeURIComponent(selectedValue)}`;
-    } else {
-        // Your existing logic for other property types
-        window.location.href = `properties.php?type=${encodeURIComponent(selectedValue)}`;
-    }
-});
+        // Property type filter (only if element exists)
+        const typeElement = document.getElementById('type');
+        if (typeElement) {
+            typeElement.addEventListener('change', function() {
+                const selectedValue = this.value;
+
+                if (selectedValue === 'new_build_villa' || selectedValue === 'new_build_apartment') {
+                    window.location.href = `new-build-properties.php?type=${encodeURIComponent(selectedValue)}`;
+                } else {
+                    // Your existing logic for other property types
+                    window.location.href = `properties.php?type=${encodeURIComponent(selectedValue)}`;
+                }
+            });
+        }
 
         // View property details
         function viewProperty(id) {

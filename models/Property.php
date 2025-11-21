@@ -57,6 +57,7 @@ class Property {
     public $new_build;  // NEW FIELD for new construction properties
     public $property_id_code;
     public $size_ownership_doc;
+    public $plot_size;  // NEW: Telekméret
     public $rooms;  // NEW FIELD
     public $building_type;
     public $city;  // RENAMED FROM neighborhood
@@ -76,6 +77,11 @@ class Property {
     public $parking;
     public $utilities;
     public $wheelchair_access;
+    public $ref_code;  // NEW: Referencia kód
+    public $virtual_tour_url;  // NEW: Virtuális túra URL
+    public $latitude;  // NEW: Szélesség
+    public $longitude;  // NEW: Hosszúság
+    public $currency;  // NEW: Valuta
     public $created_at;
     public $updated_at;
 
@@ -308,7 +314,7 @@ class Property {
                     SET title=:title, description=:description, price=:price, status=:status,
                         new_build=:new_build,
                         property_id_code=:property_id_code, size_ownership_doc=:size_ownership_doc,
-                        rooms=:rooms, building_type=:building_type, city=:city,
+                        plot_size=:plot_size, rooms=:rooms, building_type=:building_type, city=:city,
                         overall_condition=:overall_condition, accessibility=:accessibility,
                          building_material=:building_material,
                          furnished=:furnished,
@@ -316,7 +322,9 @@ class Property {
                         special_offers=:special_offers, view=:view, orientation=:orientation,
                         noise_level=:noise_level, floor_level=:floor_level, garden=:garden,
                         terrace=:terrace, parking=:parking, utilities=:utilities,
-                        wheelchair_access=:wheelchair_access";
+                        wheelchair_access=:wheelchair_access,
+                        ref_code=:ref_code, virtual_tour_url=:virtual_tour_url,
+                        latitude=:latitude, longitude=:longitude, currency=:currency";
 
         $stmt = $this->conn->prepare($query);
 
@@ -327,6 +335,7 @@ class Property {
         $stmt->bindParam(":new_build", $this->new_build);
         $stmt->bindParam(":property_id_code", $this->property_id_code);
         $stmt->bindParam(":size_ownership_doc", $this->size_ownership_doc);
+        $stmt->bindParam(":plot_size", $this->plot_size);
         $stmt->bindParam(":rooms", $this->rooms);  // NEW
         $stmt->bindParam(":building_type", $this->building_type);
         $stmt->bindParam(":city", $this->city);  // RENAMED
@@ -346,6 +355,11 @@ class Property {
         $stmt->bindParam(":parking", $this->parking);
         $stmt->bindParam(":utilities", $this->utilities);
         $stmt->bindParam(":wheelchair_access", $this->wheelchair_access);
+        $stmt->bindParam(":ref_code", $this->ref_code);
+        $stmt->bindParam(":virtual_tour_url", $this->virtual_tour_url);
+        $stmt->bindParam(":latitude", $this->latitude);
+        $stmt->bindParam(":longitude", $this->longitude);
+        $stmt->bindParam(":currency", $this->currency);
 
         if($stmt->execute()) {
             return $this->conn->lastInsertId();
@@ -359,7 +373,7 @@ class Property {
                     SET title = :title, description = :description, price = :price, status = :status,
                         new_build = :new_build,
                         property_id_code = :property_id_code, size_ownership_doc = :size_ownership_doc,
-                        rooms = :rooms, building_type = :building_type, city = :city,
+                        plot_size = :plot_size, rooms = :rooms, building_type = :building_type, city = :city,
                         overall_condition = :overall_condition, accessibility = :accessibility,
                          building_material = :building_material,
                          furnished = :furnished,
@@ -367,7 +381,10 @@ class Property {
                         special_offers = :special_offers, view = :view, orientation = :orientation,
                         noise_level = :noise_level, floor_level = :floor_level, garden = :garden,
                         terrace = :terrace, parking = :parking, utilities = :utilities,
-                        wheelchair_access = :wheelchair_access, updated_at = CURRENT_TIMESTAMP
+                        wheelchair_access = :wheelchair_access,
+                        ref_code = :ref_code, virtual_tour_url = :virtual_tour_url,
+                        latitude = :latitude, longitude = :longitude, currency = :currency,
+                        updated_at = CURRENT_TIMESTAMP
                     WHERE id = :id";
 
         $stmt = $this->conn->prepare($query);
@@ -380,6 +397,7 @@ class Property {
         $stmt->bindParam(":new_build", $this->new_build);
         $stmt->bindParam(":property_id_code", $this->property_id_code);
         $stmt->bindParam(":size_ownership_doc", $this->size_ownership_doc);
+        $stmt->bindParam(":plot_size", $this->plot_size);
         $stmt->bindParam(":rooms", $this->rooms);  // NEW
         $stmt->bindParam(":building_type", $this->building_type);
         $stmt->bindParam(":city", $this->city);  // RENAMED
@@ -399,6 +417,11 @@ class Property {
         $stmt->bindParam(":parking", $this->parking);
         $stmt->bindParam(":utilities", $this->utilities);
         $stmt->bindParam(":wheelchair_access", $this->wheelchair_access);
+        $stmt->bindParam(":ref_code", $this->ref_code);
+        $stmt->bindParam(":virtual_tour_url", $this->virtual_tour_url);
+        $stmt->bindParam(":latitude", $this->latitude);
+        $stmt->bindParam(":longitude", $this->longitude);
+        $stmt->bindParam(":currency", $this->currency);
 
         if($stmt->execute()) {
             return true;

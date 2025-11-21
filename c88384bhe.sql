@@ -27,6 +27,8 @@ SET time_zone = "+00:00";
 -- Tábla szerkezet ehhez a táblához `admins`
 --
 
+DROP TABLE IF EXISTS `admins`;
+
 CREATE TABLE `admins` (
   `id` int(11) NOT NULL,
   `username` varchar(100) NOT NULL,
@@ -47,6 +49,8 @@ INSERT INTO `admins` (`id`, `username`, `password`, `email`, `created_at`) VALUE
 --
 -- Tábla szerkezet ehhez a táblához `blog_posts`
 --
+
+DROP TABLE IF EXISTS `blog_posts`;
 
 CREATE TABLE `blog_posts` (
   `id` int(11) NOT NULL,
@@ -77,6 +81,8 @@ INSERT INTO `blog_posts` (`id`, `title`, `slug`, `excerpt`, `content`, `cover_im
 -- Tábla szerkezet ehhez a táblához `contacts`
 --
 
+DROP TABLE IF EXISTS `contacts`;
+
 CREATE TABLE `contacts` (
   `id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
@@ -99,6 +105,8 @@ INSERT INTO `contacts` (`id`, `name`, `email`, `phone`, `message`, `created_at`)
 --
 -- Tábla szerkezet ehhez a táblához `content_sections`
 --
+
+DROP TABLE IF EXISTS `content_sections`;
 
 CREATE TABLE `content_sections` (
   `id` int(11) NOT NULL,
@@ -187,6 +195,8 @@ INSERT INTO `content_sections` (`id`, `section_key`, `section_name`, `content_ty
 -- Tábla szerkezet ehhez a táblához `images`
 --
 
+DROP TABLE IF EXISTS `images`;
+
 CREATE TABLE `images` (
   `id` int(11) NOT NULL,
   `property_id` int(11) NOT NULL,
@@ -210,6 +220,8 @@ INSERT INTO `images` (`id`, `property_id`, `image_path`, `image_order`, `created
 --
 -- Tábla szerkezet ehhez a táblához `properties`
 --
+
+DROP TABLE IF EXISTS `properties`;
 
 CREATE TABLE `properties` (
   `id` int(11) NOT NULL,
@@ -273,6 +285,8 @@ INSERT INTO `properties` (`id`, `title`, `description`, `price`, `status`, `prop
 --
 -- Tábla szerkezet ehhez a táblához `property_features`
 --
+
+DROP TABLE IF EXISTS `property_features`;
 
 CREATE TABLE `property_features` (
   `id` int(11) NOT NULL,
@@ -421,6 +435,8 @@ INSERT INTO `property_features` (`id`, `property_id`, `feature`) VALUES
 --
 -- Tábla szerkezet ehhez a táblához `property_images`
 --
+
+DROP TABLE IF EXISTS `property_images`;
 
 CREATE TABLE `property_images` (
   `id` int(11) NOT NULL,

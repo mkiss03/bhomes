@@ -220,6 +220,7 @@ switch($method) {
             $property->new_build = $data->new_build ?? 0;
             $property->property_id_code = $data->property_id_code ?? '';
             $property->size_ownership_doc = $data->size_ownership_doc ?? null;
+            $property->plot_size = $data->plot_size ?? null;
             $property->rooms = isset($data->rooms) && $data->rooms !== '' ? (int)$data->rooms : null;
             $property->building_type = $data->building_type ?? '';
             $property->city = $data->city ?? '';
@@ -239,6 +240,11 @@ switch($method) {
             $property->parking = $data->parking ?? 0;
             $property->utilities = $data->utilities ?? 0;
             $property->wheelchair_access = $data->wheelchair_access ?? 0;
+            $property->ref_code = $data->ref_code ?? '';
+            $property->virtual_tour_url = $data->virtual_tour_url ?? '';
+            $property->latitude = $data->latitude ?? null;
+            $property->longitude = $data->longitude ?? null;
+            $property->currency = $data->currency ?? 'EUR';
 
             $property_id = $property->create();
 
@@ -278,6 +284,7 @@ switch($method) {
             $property->new_build = $data->new_build ?? 0;
             $property->property_id_code = $data->property_id_code ?? '';
             $property->size_ownership_doc = $data->size_ownership_doc ?? null;
+            $property->plot_size = $data->plot_size ?? null;
             $property->rooms = isset($data->rooms) && $data->rooms !== '' ? (int)$data->rooms : null;
             $property->building_type = $data->building_type ?? '';
             $property->city = $data->city ?? '';
@@ -297,6 +304,11 @@ switch($method) {
             $property->parking = $data->parking ?? 0;
             $property->utilities = $data->utilities ?? 0;
             $property->wheelchair_access = $data->wheelchair_access ?? 0;
+            $property->ref_code = $data->ref_code ?? '';
+            $property->virtual_tour_url = $data->virtual_tour_url ?? '';
+            $property->latitude = $data->latitude ?? null;
+            $property->longitude = $data->longitude ?? null;
+            $property->currency = $data->currency ?? 'EUR';
 
             if($property->update()) {
                 http_response_code(200);
