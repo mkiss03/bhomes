@@ -1,141 +1,111 @@
 <?php
-// api/contact.php
+// STANDALONE Contact Form Handler - NO INCLUDES, NO DEPENDENCIES
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0); // Don't display errors to user
+ini_set('log_errors', 1);
 
+// Headers
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+header("Access-Control-Allow-Headers: Content-Type");
 
-// Log errors to file for debugging
-ini_set('log_errors', 1);
-ini_set('error_log', dirname(__DIR__) . '/error_log.txt');
+// Only allow POST
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(["success" => false, "message" => "Method not allowed"]);
+    exit;
+}
 
 try {
-    // Determine the base path dynamically (works in different environments)
-    $base_path = dirname(__DIR__);
+    // Get POST data
+    $input = file_get_contents("php://input");
+    $data = json_decode($input);
 
-    // Alternative: If dirname(__DIR__) doesn't work, try $_SERVER['DOCUMENT_ROOT']
-    if (!is_dir($base_path) || !file_exists($base_path . '/config')) {
-        $base_path = $_SERVER['DOCUMENT_ROOT'];
+    // Validate JSON
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        throw new Exception("Invalid JSON: " . json_last_error_msg());
     }
 
-    // Load config with absolute path
-    $config_path = $base_path . '/config/database.php';
-    $model_path = $base_path . '/models/Contact.php';
-
-    // Verify files exist
-    if (!file_exists($config_path)) {
-        error_log("Config not found. Tried: " . $config_path);
-        throw new Exception("Config file not found. Base path: " . $base_path);
-    }
-
-    if (!file_exists($model_path)) {
-        error_log("Model not found. Tried: " . $model_path);
-        throw new Exception("Contact model not found. Base path: " . $base_path);
-    }
-
-    // Include required files
-    require_once $config_path;
-    require_once $model_path;
-
-    // Verify classes are loaded
-    if (!class_exists('Database')) {
-        throw new Exception("Database class not loaded");
-    }
-
-    if (!class_exists('Contact')) {
-        throw new Exception("Contact class not loaded");
-    }
-
-    // Create database connection
-    $database = new Database();
-    $db = $database->getConnection();
-
-    if (!$db) {
-        throw new Exception("Database connection returned null");
-    }
-
-    // Create Contact instance
-    $contact = new Contact($db);
-
-    if($_SERVER['REQUEST_METHOD'] == 'POST') {
-        // Get raw POST data
-        $raw_input = file_get_contents("php://input");
-
-        if (empty($raw_input)) {
-            throw new Exception("No POST data received");
-        }
-
-        // Decode JSON
-        $data = json_decode($raw_input);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception("JSON decode error: " . json_last_error_msg());
-        }
-
-        // Validate required fields
-        if(!empty($data->name) && !empty($data->email) && !empty($data->message)) {
-            // Sanitize inputs
-            $contact->name = htmlspecialchars(strip_tags($data->name));
-            $contact->email = htmlspecialchars(strip_tags($data->email));
-            $contact->phone = htmlspecialchars(strip_tags($data->phone ?? ''));
-            $contact->message = htmlspecialchars(strip_tags($data->message));
-
-            // Log the attempt
-            error_log("Attempting to create contact for: " . $contact->email);
-
-            // Try to create contact
-            if($contact->create()) {
-                http_response_code(201);
-                echo json_encode(array(
-                    "success" => true,
-                    "message" => "Contact message sent successfully."
-                ));
-            } else {
-                error_log("Contact create() returned false for: " . $contact->email);
-                http_response_code(503);
-                echo json_encode(array(
-                    "success" => false,
-                    "message" => "Unable to send message. Database insert failed.",
-                    "debug" => "create() returned false"
-                ));
-            }
-        } else {
-            // Missing required fields
-            $missing = [];
-            if (empty($data->name)) $missing[] = 'name';
-            if (empty($data->email)) $missing[] = 'email';
-            if (empty($data->message)) $missing[] = 'message';
-
-            http_response_code(400);
-            echo json_encode(array(
-                "success" => false,
-                "message" => "Unable to send message. Data is incomplete.",
-                "missing_fields" => $missing
-            ));
-        }
-    } else {
-        http_response_code(405);
-        echo json_encode(array(
+    // Validate required fields
+    if (empty($data->name) || empty($data->email) || empty($data->message)) {
+        http_response_code(400);
+        echo json_encode([
             "success" => false,
-            "message" => "Method not allowed. Only POST requests are accepted."
-        ));
+            "message" => "Name, email, and message are required"
+        ]);
+        exit;
     }
-} catch (Exception $e) {
-    // Log the error
-    error_log("Contact form error: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine());
-    error_log("Stack trace: " . $e->getTraceAsString());
 
+    // Sanitize inputs
+    $name = strip_tags(trim($data->name));
+    $email = filter_var(trim($data->email), FILTER_SANITIZE_EMAIL);
+    $phone = isset($data->phone) ? strip_tags(trim($data->phone)) : '';
+    $message = strip_tags(trim($data->message));
+
+    // Validate email
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        http_response_code(400);
+        echo json_encode([
+            "success" => false,
+            "message" => "Invalid email address"
+        ]);
+        exit;
+    }
+
+    // Database connection - DIRECT, NO INCLUDES
+    $db_host = 'mysql.rackhost.hu';
+    $db_name = 'c88384bhe';
+    $db_user = 'c88384eszti';
+    $db_pass = 'Eszter2009';
+
+    // Connect to database
+    $dsn = "mysql:host={$db_host};dbname={$db_name};charset=utf8mb4";
+    $options = [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES => false
+    ];
+
+    $pdo = new PDO($dsn, $db_user, $db_pass, $options);
+
+    // Insert contact into database
+    $sql = "INSERT INTO contacts (name, email, phone, message, created_at)
+            VALUES (:name, :email, :phone, :message, NOW())";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        ':name' => $name,
+        ':email' => $email,
+        ':phone' => $phone,
+        ':message' => $message
+    ]);
+
+    // Success response
+    http_response_code(201);
+    echo json_encode([
+        "success" => true,
+        "message" => "Message sent successfully!"
+    ]);
+
+} catch (PDOException $e) {
+    // Database error
+    error_log("Contact form DB error: " . $e->getMessage());
     http_response_code(500);
-    echo json_encode(array(
+    echo json_encode([
         "success" => false,
-        "message" => "Internal server error",
-        "error" => $e->getMessage(),
-        "file" => $e->getFile(),
-        "line" => $e->getLine(),
-        "trace" => $e->getTraceAsString()
-    ));
+        "message" => "Database error",
+        "error" => $e->getMessage()
+    ]);
+
+} catch (Exception $e) {
+    // General error
+    error_log("Contact form error: " . $e->getMessage());
+    http_response_code(500);
+    echo json_encode([
+        "success" => false,
+        "message" => "Server error",
+        "error" => $e->getMessage()
+    ]);
 }
 ?>
