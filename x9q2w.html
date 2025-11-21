@@ -1454,24 +1454,39 @@ validatePropertyForm() {
                     try {
                         let url = 'api/content.php?';
                         const params = new URLSearchParams();
-                        
+
                         if (this.contentFilters.page) {
                             params.append('page', this.contentFilters.page);
                         }
                         if (this.contentFilters.section_group) {
                             params.append('section_group', this.contentFilters.section_group);
                         }
-                        
-                        const response = await fetch(url + params.toString());
+
+                        // Add cache buster to prevent browser caching
+                        params.append('_nocache', Date.now());
+
+                        const response = await fetch(url + params.toString(), {
+                            cache: 'no-store',
+                            headers: {
+                                'Cache-Control': 'no-cache'
+                            }
+                        });
+
                         if (response.ok) {
                             let data = await response.json();
-                            
+
                             if (this.contentFilters.content_type) {
                                 data = data.filter(item => item.content_type === this.contentFilters.content_type);
                             }
-                            
+
                             this.contentSections = data;
                             this.loadAvailableGroups();
+                        } else {
+                            console.error('Failed to load content:', response.status, response.statusText);
+                            const errorData = await response.json().catch(() => null);
+                            if (errorData) {
+                                console.error('Error details:', errorData);
+                            }
                         }
                     } catch (error) {
                         console.error('Error loading content sections:', error);

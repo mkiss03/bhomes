@@ -9,8 +9,23 @@ header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 try {
-    include_once '../config/database.php';
-    include_once '../models/Contact.php';
+    // Determine the base path dynamically
+    $base_path = dirname(__DIR__);
+
+    // Load config with absolute path
+    $config_path = $base_path . '/config/database.php';
+    $model_path = $base_path . '/models/Contact.php';
+
+    if (!file_exists($config_path)) {
+        throw new Exception("Config file not found at: " . $config_path);
+    }
+
+    if (!file_exists($model_path)) {
+        throw new Exception("Contact model not found at: " . $model_path);
+    }
+
+    include_once $config_path;
+    include_once $model_path;
 
     $database = new Database();
     $db = $database->getConnection();
