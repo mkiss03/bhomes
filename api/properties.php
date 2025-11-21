@@ -217,6 +217,7 @@ switch($method) {
             $property->description = $data->description ?? '';
             $property->price = $data->price;
             $property->status = $data->status ?? 'for_sale';
+            $property->new_build = $data->new_build ?? 0;
             $property->property_id_code = $data->property_id_code ?? '';
             $property->size_ownership_doc = $data->size_ownership_doc ?? null;
             $property->rooms = isset($data->rooms) && $data->rooms !== '' ? (int)$data->rooms : null;
@@ -274,6 +275,7 @@ switch($method) {
             $property->description = $data->description ?? '';
             $property->price = $data->price;
             $property->status = $data->status ?? 'for_sale';
+            $property->new_build = $data->new_build ?? 0;
             $property->property_id_code = $data->property_id_code ?? '';
             $property->size_ownership_doc = $data->size_ownership_doc ?? null;
             $property->rooms = isset($data->rooms) && $data->rooms !== '' ? (int)$data->rooms : null;

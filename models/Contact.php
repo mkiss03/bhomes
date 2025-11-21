@@ -1,40 +1,120 @@
-<?php 
-// api/contact.php
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: POST");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+<?php
+// models/Contact.php
+class Contact {
+    private $conn;
+    private $table_name = "contacts";
 
-include_once '../config/database.php';
-include_once '../models/Contact.php';
+    public $id;
+    public $name;
+    public $email;
+    public $phone;
+    public $message;
+    public $created_at;
 
-$database = new Database();
-$db = $database->getConnection();
-$contact = new Contact($db);
-
-if($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $data = json_decode(file_get_contents("php://input"));
-
-    if(!empty($data->name) && !empty($data->email) && !empty($data->message)) {
-        $contact->name = htmlspecialchars(strip_tags($data->name));
-        $contact->email = htmlspecialchars(strip_tags($data->email));
-        $contact->phone = htmlspecialchars(strip_tags($data->phone ?? ''));
-        $contact->message = htmlspecialchars(strip_tags($data->message));
-
-        if($contact->create()) {
-            http_response_code(201);
-            echo json_encode(array("message" => "Contact message sent successfully."));
-        } else {
-            http_response_code(503);
-            echo json_encode(array("message" => "Unable to send message."));
-        }
-    } else {
-        http_response_code(400);
-        echo json_encode(array("message" => "Unable to send message. Data is incomplete."));
+    public function __construct($db) {
+        $this->conn = $db;
+        $this->createTableIfNotExists();
     }
-} else {
-    http_response_code(405);
-    echo json_encode(array("message" => "Method not allowed."));
-}
 
+    // Create contacts table if it doesn't exist
+    private function createTableIfNotExists() {
+        $query = "CREATE TABLE IF NOT EXISTS " . $this->table_name . " (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            email VARCHAR(100) NOT NULL,
+            phone VARCHAR(50),
+            message TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )";
+
+        try {
+            $this->conn->exec($query);
+        } catch (PDOException $e) {
+            error_log("Error creating contacts table: " . $e->getMessage());
+        }
+    }
+
+    // Create new contact message
+    public function create() {
+        $query = "INSERT INTO " . $this->table_name . "
+                    SET name = :name,
+                        email = :email,
+                        phone = :phone,
+                        message = :message";
+
+        $stmt = $this->conn->prepare($query);
+
+        // Bind values (already sanitized in the API endpoint)
+        $stmt->bindParam(':name', $this->name);
+        $stmt->bindParam(':email', $this->email);
+        $stmt->bindParam(':phone', $this->phone);
+        $stmt->bindParam(':message', $this->message);
+
+        if($stmt->execute()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    // Read all contacts (for admin)
+    public function readAll() {
+        $query = "SELECT * FROM " . $this->table_name . "
+                  ORDER BY created_at DESC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Read single contact
+    public function readOne() {
+        $query = "SELECT * FROM " . $this->table_name . "
+                  WHERE id = :id LIMIT 1";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $this->id);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($row) {
+            $this->name = $row['name'];
+            $this->email = $row['email'];
+            $this->phone = $row['phone'];
+            $this->message = $row['message'];
+            $this->created_at = $row['created_at'];
+
+            return $row;
+        }
+
+        return false;
+    }
+
+    // Delete contact
+    public function delete() {
+        $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $this->id);
+
+        if($stmt->execute()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    // Count total contacts
+    public function count() {
+        $query = "SELECT COUNT(*) as total FROM " . $this->table_name;
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row['total'];
+    }
+}
 ?>

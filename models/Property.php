@@ -54,6 +54,7 @@ class Property {
     public $description;
     public $price;
     public $status;
+    public $new_build;  // NEW FIELD for new construction properties
     public $property_id_code;
     public $size_ownership_doc;
     public $rooms;  // NEW FIELD
@@ -257,6 +258,7 @@ class Property {
             $this->description = $row['description'];
             $this->price = $row['price'];
             $this->status = $row['status'];
+            $this->new_build = $row['new_build'] ?? 0;  // NEW
             $this->property_id_code = $row['property_id_code'];
             $this->size_ownership_doc = $row['size_ownership_doc'];
             $this->rooms = $row['rooms'];  // NEW
@@ -304,6 +306,7 @@ class Property {
     public function create() {
         $query = "INSERT INTO " . $this->table_name . "
                     SET title=:title, description=:description, price=:price, status=:status,
+                        new_build=:new_build,
                         property_id_code=:property_id_code, size_ownership_doc=:size_ownership_doc,
                         rooms=:rooms, building_type=:building_type, city=:city,
                         overall_condition=:overall_condition, accessibility=:accessibility,
@@ -321,6 +324,7 @@ class Property {
         $stmt->bindParam(":description", $this->description);
         $stmt->bindParam(":price", $this->price);
         $stmt->bindParam(":status", $this->status);
+        $stmt->bindParam(":new_build", $this->new_build);
         $stmt->bindParam(":property_id_code", $this->property_id_code);
         $stmt->bindParam(":size_ownership_doc", $this->size_ownership_doc);
         $stmt->bindParam(":rooms", $this->rooms);  // NEW
@@ -353,6 +357,7 @@ class Property {
     public function update() {
         $query = "UPDATE " . $this->table_name . "
                     SET title = :title, description = :description, price = :price, status = :status,
+                        new_build = :new_build,
                         property_id_code = :property_id_code, size_ownership_doc = :size_ownership_doc,
                         rooms = :rooms, building_type = :building_type, city = :city,
                         overall_condition = :overall_condition, accessibility = :accessibility,
@@ -372,6 +377,7 @@ class Property {
         $stmt->bindParam(":description", $this->description);
         $stmt->bindParam(":price", $this->price);
         $stmt->bindParam(":status", $this->status);
+        $stmt->bindParam(":new_build", $this->new_build);
         $stmt->bindParam(":property_id_code", $this->property_id_code);
         $stmt->bindParam(":size_ownership_doc", $this->size_ownership_doc);
         $stmt->bindParam(":rooms", $this->rooms);  // NEW
