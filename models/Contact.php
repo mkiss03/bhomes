@@ -18,13 +18,28 @@ class Contact {
     // Create new contact message
     public function create() {
         try {
+            // Verify connection exists
+            if (!$this->conn) {
+                error_log("Contact create: No database connection");
+                return false;
+            }
+
             $query = "INSERT INTO " . $this->table_name . "
                         SET name = :name,
                             email = :email,
                             phone = :phone,
                             message = :message";
 
+            // Log the query for debugging
+            error_log("Contact create query: " . $query);
+
             $stmt = $this->conn->prepare($query);
+
+            if (!$stmt) {
+                error_log("Contact create: Failed to prepare statement");
+                error_log("PDO Error: " . print_r($this->conn->errorInfo(), true));
+                return false;
+            }
 
             // Bind values (already sanitized in the API endpoint)
             $stmt->bindParam(':name', $this->name);
@@ -32,15 +47,27 @@ class Contact {
             $stmt->bindParam(':phone', $this->phone);
             $stmt->bindParam(':message', $this->message);
 
+            // Log the bound values (for debugging)
+            error_log("Inserting contact - Name: " . $this->name . ", Email: " . $this->email);
+
             if($stmt->execute()) {
+                error_log("Contact created successfully for: " . $this->email);
                 return true;
             }
 
             // Log SQL error
-            error_log("Contact create failed: " . print_r($stmt->errorInfo(), true));
+            $errorInfo = $stmt->errorInfo();
+            error_log("Contact create failed - SQLSTATE: " . $errorInfo[0] .
+                     ", Error Code: " . $errorInfo[1] .
+                     ", Message: " . $errorInfo[2]);
             return false;
         } catch (PDOException $e) {
-            error_log("Contact create exception: " . $e->getMessage());
+            error_log("Contact create PDOException: " . $e->getMessage());
+            error_log("Error code: " . $e->getCode());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            return false;
+        } catch (Exception $e) {
+            error_log("Contact create Exception: " . $e->getMessage());
             return false;
         }
     }
