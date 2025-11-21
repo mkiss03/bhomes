@@ -17,25 +17,32 @@ class Contact {
 
     // Create new contact message
     public function create() {
-        $query = "INSERT INTO " . $this->table_name . "
-                    SET name = :name,
-                        email = :email,
-                        phone = :phone,
-                        message = :message";
+        try {
+            $query = "INSERT INTO " . $this->table_name . "
+                        SET name = :name,
+                            email = :email,
+                            phone = :phone,
+                            message = :message";
 
-        $stmt = $this->conn->prepare($query);
+            $stmt = $this->conn->prepare($query);
 
-        // Bind values (already sanitized in the API endpoint)
-        $stmt->bindParam(':name', $this->name);
-        $stmt->bindParam(':email', $this->email);
-        $stmt->bindParam(':phone', $this->phone);
-        $stmt->bindParam(':message', $this->message);
+            // Bind values (already sanitized in the API endpoint)
+            $stmt->bindParam(':name', $this->name);
+            $stmt->bindParam(':email', $this->email);
+            $stmt->bindParam(':phone', $this->phone);
+            $stmt->bindParam(':message', $this->message);
 
-        if($stmt->execute()) {
-            return true;
+            if($stmt->execute()) {
+                return true;
+            }
+
+            // Log SQL error
+            error_log("Contact create failed: " . print_r($stmt->errorInfo(), true));
+            return false;
+        } catch (PDOException $e) {
+            error_log("Contact create exception: " . $e->getMessage());
+            return false;
         }
-
-        return false;
     }
 
     // Read all contacts (for admin)

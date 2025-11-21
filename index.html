@@ -1225,16 +1225,20 @@
             return card;
         }
 
-        document.getElementById('type').addEventListener('change', function() {
-    const selectedValue = this.value;
-    
-    if (selectedValue === 'new_build_villa' || selectedValue === 'new_build_apartment') {
-        window.location.href = `new-build-properties.php?type=${encodeURIComponent(selectedValue)}`;
-    } else {
-        // Your existing logic for other property types
-        window.location.href = `properties.php?type=${encodeURIComponent(selectedValue)}`;
-    }
-});
+        // Property type filter (only if element exists)
+        const typeElement = document.getElementById('type');
+        if (typeElement) {
+            typeElement.addEventListener('change', function() {
+                const selectedValue = this.value;
+
+                if (selectedValue === 'new_build_villa' || selectedValue === 'new_build_apartment') {
+                    window.location.href = `new-build-properties.php?type=${encodeURIComponent(selectedValue)}`;
+                } else {
+                    // Your existing logic for other property types
+                    window.location.href = `properties.php?type=${encodeURIComponent(selectedValue)}`;
+                }
+            });
+        }
 
         // View property details
         function viewProperty(id) {
