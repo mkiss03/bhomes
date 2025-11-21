@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-content="hero_title">Costa Blanca - A spanyol ingatlanpiac kapuja</title>
+     <meta name="description" content="Találja meg álmai otthonát Costa Blancán! Eladó és kiadó apartmanok, villák, házak. Best Homes Espana – megbízható ingatlanközvetítő Spanyolországban.">
+  <meta name="keywords" content="Costa Blanca ingatlan, eladó apartman, kiadó villa, Best Homes Espana, spanyol ingatlanok">
+  <link rel="canonical" href="https://besthomesespana.com/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Best Homes Espana – Eladó és kiadó ingatlanok Costa Blancán">
+  <meta property="og:description" content="Találja meg álmai otthonát Costa Blancán! Modern apartmanok, luxus villák, befektetési lehetőségek.">
+  <meta property="og:image" content="https://besthomesespana.com/images/hero.jpg">
+  <meta property="og:url" content="https://besthomesespana.com/">
+  <meta property="og:type" content="website">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Best Homes Espana – Eladó és kiadó ingatlanok Costa Blancán">
+  <meta name="twitter:description" content="Spanyol ingatlanok Costa Blancán – apartmanok, villák, házak.">
+  <meta name="twitter:image" content="https://besthomesespana.com/images/main1.jpg">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        .hero-slider {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            filter: blur(1px);
+        }
+        
+        .hero-slide.active {
+            opacity: 1;
+        }
+        
+        .hero-slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 10;
+        }
+        
+        .navbar-scroll {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .property-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .property-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .property-card-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            padding: 1.5rem;
+        }
+        
+        .property-card-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .property-card-button {
+            margin-top: auto;
+            padding-top: 1rem;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.6s ease;
+        }
+        
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Add this CSS to your existing styles section */
+
+/* Enhanced navbar background for better visibility */
+#navbar {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Enhanced text visibility with text shadow */
+#navbar h1,
+#navbar a,
+#navbar button {
+    text-shadow: 
+        0 1px 2px rgba(255, 255, 255, 0.8),
+        0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    font-weight: 500 !important;
+}
+
+/* Stronger background on scroll */
+#navbar.navbar-scroll {
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Mobile menu enhanced visibility */
+#navbar .bg-white.shadow-lg {
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+}
+
+/* Ensure company name (yellow text) is always visible */
+#navbar .text-yellow-400 {
+    text-shadow: 
+        0 1px 3px rgba(0, 0, 0, 0.5),
+        0 2px 6px rgba(0, 0, 0, 0.3) !important;
+    font-weight: 700 !important;
+}
+
+/* Additional contrast for navigation links */
+#navbar a:hover {
+    background: rgba(255, 255, 255, 0.8) !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 0.5rem !important;
+    transition: all 0.3s ease !important;
+}
+
+/* Mobile menu items enhanced */
+#navbar .block.px-3.py-2 {
+    background: rgba(255, 255, 255, 0.9) !important;
+    margin: 0.25rem !important;
+    border-radius: 0.5rem !important;
+    transition: all 0.3s ease !important;
+}
+
+#navbar .block.px-3.py-2:hover {
+    background: rgba(255, 255, 255, 1) !important;
+    transform: translateX(4px) !important;
+
+    /* Mobile hero section fix - Add this after your existing navbar CSS */
+
+/* Fix hero section overlap on mobile */
+#home.hero-slider {
+    padding-top: 100px; /* Extra space for your taller navbar with phone number */
+}
+
+/* Desktop - less padding needed */
+@media (min-width: 768px) {
+    #home.hero-slider {
+        padding-top: 20px;
+    }
+}
+
+/* Optional: Make navbar slightly more compact on mobile */
+@media (max-width: 767px) {
+    #navbar .h-16 {
+        min-height: 4rem; /* Ensure navbar has enough height for content */
+    }
+    
+    /* Make company name and phone smaller on mobile */
+    #navbar .text-3xl {
+        font-size: 1.5rem; /* Smaller company name on mobile */
+    }
+    
+    #navbar .text-2xl {
+        font-size: 1rem; /* Smaller phone number on mobile */
+    }
+}
+}
+
+#navbar .flex-shrink-0 {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* Style the phone number container */
+#navbar .flex.items-center.space-x-2 {
+    margin-top: 2px;
+}
+
+/* Icon hover effects */
+#navbar svg {
+    transition: all 0.3s ease;
+}
+
+#navbar svg:hover {
+    transform: scale(1.1);
+}
+
+/* Phone icon styling */
+#navbar .material-icons {
+    text-shadow: 
+        0 1px 3px rgba(0, 0, 0, 0.5),
+        0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Mobile responsiveness for icons */
+@media (max-width: 767px) {
+    #navbar .w-6.h-6 {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+    
+    #navbar .text-2xl {
+        font-size: 1.25rem;
+    }
+    
+    #navbar .text-xl {
+        font-size: 1rem;
+    }
+}
+
+/* Navbar responsive fixes */
+@media (min-width: 768px) {
+    .md\:block {
+        display: block !important;
+    }
+    .md\:hidden {
+        display: none !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .md\:block {
+        display: none !important;
+    }
+}
+
+/* Ensure navbar items are properly positioned */
+#navbar .hidden.md\:block {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    #navbar .hidden.md\:block {
+        display: block !important;
+    }
+}
+    </style>
+</head>
+<body class="bg-white text-gray-800">
+    
+    <!-- Navigation -->
+    <!-- Navigation -->
+    <nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-300" x-data="{ open: false }">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Company name and contact info -->
+                <div class="flex-shrink-0">
+                    <h1 class="text-3xl font-bold text-yellow-400" data-content="footer_company_name">Best Homes España</h1>
+                    <div class="flex items-center space-x-2">
+                        <!-- Phone icon -->
+                        <span class="material-icons text-red-600 text-xl">phone</span>
+                        <h1 class="text-2xl font-bold text-red-800">+36706310000</h1>
+                        
+                        <!-- WhatsApp Icon -->
+                        <a href="https://wa.me/36706310000" target="_blank" class="text-green-500 hover:text-green-600 transition-colors" title="WhatsApp">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+                            </svg>
+                        </a>
+                        
+                        <!-- Proper Viber Icon -->
+                        <a href="viber://chat?number=%2B36706310000" target="_blank" class="text-purple-600 hover:text-purple-700 transition-colors" title="Viber">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M11.4 0C9.473.028 5.333.344 3.02 2.467 1.302 4.187.696 6.7.633 9.817c-.066 3.103-.143 8.863 5.39 10.59v2.366s-.037.93.606.561c.64-.367 2.661-1.737 3.307-2.366C11.1 20.853 12.29 20.729 13.38 20.6c4.308-.595 7.935-2.852 8.698-8.4.9-5.4-.334-8.971-2.572-10.685C17.78.179 14.53-.047 11.4 0zm.067 1.697c2.824-.022 5.211.18 6.842 1.509 1.809 1.453 2.472 4.28 1.716 8.587-.59 4.713-3.725 6.294-7.933 6.8-1.018.088-2.03.212-3.132.12 0 0-2.582 2.08-3.294 2.772-.184.178-.332.084-.277-.228l.332-3.539C1.548 16.147 1.668 11.894 1.717 9.156c.060-2.66.537-4.833 1.961-6.22C5.896 1.35 9.214 1.726 11.467 1.7zm3.062 2.628c-.088 0-.266.005-.31.05-.044.05-.044.133 0 .177.05.044.133.044.177 0 .044-.044.044-.133 0-.177-.05-.05-.133-.05-.177 0-.044.05-.044.133 0 .177.044.044.133.044.177 0l.31.05c.088.01.177-.04.222-.116l.133-.266c.044-.089-.044-.177-.133-.133l-.266.133c-.089.044-.133.133-.089.222.044.089.133.133.222.089l.266-.133c.089-.044.133-.133.089-.222-.044-.089-.133-.133-.222-.089l-.133.266c-.044.089.044.177.133.133.089-.044.177.044.133.133l-.266.133c-.089.044-.133.133-.089.222.044.089.133.133.222.089l.133-.266c.044-.089-.044-.177-.133-.133-.089.044-.177-.044-.133-.133l.266-.133c.089-.044.133-.133.089-.222-.044-.089-.133-.133-.222-.089l-.266.133c-.089.044-.133.133-.089.222.044.089.133.133.222.089.089-.044.177.044.133.133l-.133.266c-.044.089.044.177.133.133l.266-.133c.089-.044.133-.133.089-.222-.044-.089-.133-.133-.222-.089l-.133.266c-.044.089.044.177.133.133.089-.044.177.044.133.133-.044.089.044.177.133.133.089-.044.177.044.133.133l-.266.133c-.089.044-.133.133-.089.222.044.089.133.133.222.089l.133-.266c.044-.089-.044-.177-.133-.133-.089.044-.177-.044-.133-.133.044-.089-.044-.177-.133-.133l-.266.133c-.089.044-.133.133-.089.222.044.089.133.133.222.089l.266-.133c.089-.044.133-.133.089-.222-.044-.089-.133-.133-.222-.089l-.133.266c-.044.089.044.177.133.133.089-.044.177.044.133.133l-.266.133c-.089.044-.133.133-.089.222.044.089.133.133.222.089zm-1.245 1.245c-.088 0-.177.089-.133.177.044.089.133.133.222.089.089-.044.177.044.133.133l-.266.133c-.089.044-.133.133-.089.222.044.089.133.133.222.089l.133-.266c.044-.089-.044-.177-.133-.133-.089.044-.177-.044-.133-.133.044-.089-.044-.177-.133-.133l-.266.133c-.089.044-.133.133-.089.222.044.089.133.133.222.089l.266-.133c.089-.044.133-.133.089-.222-.044-.089-.133-.133-.222-.089l-.133.266c-.044.089.044.177.133.133.089-.044.177.044.133.133-.044.089.044.177.133.133l.266-.133c.089-.044.133-.133.089-.222-.044-.089-.133-.133-.222-.089l-.266.133c-.089.044-.133.133-.089.222.044.089.133.133.222.089l.133-.266c.044-.089-.044-.177-.133-.133-.089.044-.177-.044-.133-.133.044-.089-.044-.177-.133-.133l-.266.133c-.089.044-.133.133-.089.222.044.089.133.133.222.089.089-.044.177.044.133.133l-.133.266c-.044.089.044.177.133.133l.266-.133c.089-.044.133-.133.089-.222-.044-.089-.133-.133-.222-.089l-.133.266c-.044.089.044.177.133.133.089-.044.177.044.133.133zm-6.8 1.962c-.733-.067-1.423.24-1.962.844-.67.712-1.028 1.71-.844 2.628.267 1.34 1.34 2.406 2.628 3.183 1.517 1.072 3.294 1.962 5.16 2.405 1.028.267 2.183.178 3.05-.444 1.34-.89 1.962-2.673 1.161-4.013-.444-.711-1.072-1.34-1.694-1.783-.622-.444-1.517-.711-2.317-.356-.978.444-1.694 1.428-2.05 2.495-.178.533-.089 1.161.356 1.605.356.356.844.622 1.34.8.978.356 2.14.089 2.85-.622.444-.444.8-1.072.8-1.694 0-.533-.178-1.072-.622-1.428-.356-.267-.8-.356-1.161-.089-.267.178-.356.533-.178.8.089.178.267.267.444.267.178 0 .356-.089.444-.267.089-.178.089-.356 0-.533-.089-.178-.267-.267-.444-.267-.178 0-.356.089-.444.267-.089.178-.089.356 0 .533.089.178.267.267.444.267.178 0 .356-.089.444-.267.089-.178.089-.356 0-.533-.089-.178-.267-.267-.444-.267-.178 0-.356.089-.444.267-.089.178-.089.356 0 .533.089.178.267.267.444.267.178 0 .356-.089.444-.267.089-.178.089-.356 0-.533-.089-.178-.267-.267-.444-.267-.178 0-.356.089-.444.267-.089.178-.089.356 0 .533.089.178.267.267.444.267.178 0 .356-.089.444-.267.089-.178.089-.356 0-.533-.089-.178-.267-.267-.444-.267-.178 0-.356.089-.444.267-.089.178-.089.356 0 .533.089.178.267.267.444.267.178 0 .356-.089.444-.267.089-.178.089-.356 0-.533-.089-.178-.267-.267-.444-.267-.178 0-.356.089-.444.267-.089.178-.089.356 0 .533.089.178.267.267.444.267.178 0 .356-.089.444-.267.089-.178.089-.356 0-.533-.089-.178-.267-.267-.444-.267-.178 0-.356.089-.444.267-.089.178-.089.356 0 .533.089.178.267.267.444.267.178 0 .356-.089.444-.267.089-.178.089-.356 0-.533-.089-.178-.267-.267-.444-.267z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Desktop Navigation Menu -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="#home" class="hover:text-blue-600 transition-colors" data-content="nav_home">Főoldal</a>
+                        <a href="#properties" class="hover:text-blue-600 transition-colors" data-content="nav_properties">Ingatlanok</a>
+                        <a href="#costa-blanca" class="hover:text-blue-600 transition-colors" data-content="nav_costa_blanca">Costa Blanca</a>
+                        <a href="#about" class="hover:text-blue-600 transition-colors" data-content="nav_about">Rólunk</a>
+                        <a href="./blog.html" class="hover:text-blue-600 transition-colors">Blog</a>
+                        <a href="#contact" class="hover:text-blue-600 transition-colors" data-content="nav_contact">Kapcsolat</a>
+                    </div>
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button @click="open = !open" class="text-gray-600 hover:text-blue-600">
+                        <span class="material-icons">menu</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div x-show="open" x-transition class="md:hidden bg-white shadow-lg">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="#home" @click="open = false" class="block px-3 py-2 hover:text-blue-600" data-content="nav_home">Főoldal</a>
+                <a href="#properties" @click="open = false" class="block px-3 py-2 hover:text-blue-600" data-content="nav_properties">Ingatlanok</a>
+                <a href="#costa-blanca" @click="open = false" class="block px-3 py-2 hover:text-blue-600" data-content="nav_costa_blanca">Costa Blanca</a>
+                <a href="#about" @click="open = false" class="block px-3 py-2 hover:text-blue-600" data-content="nav_about">Rólunk</a>
+                <a href="./blog.html" @click="open = false" class="block px-3 py-2 hover:text-blue-600">Blog</a>
+                <a href="#contact" @click="open = false" class="block px-3 py-2 hover:text-blue-600" data-content="nav_contact">Kapcsolat</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Automated Slider -->
+    <section id="home" class="hero-slider min-h-screen flex items-center justify-center text-white">
+        <!-- Slide 1 -->
+        <div class="hero-slide active" style="background-image: url('./images/main1.jpg');"></div>
+        <!-- Slide 2 -->
+        <div class="hero-slide" style="background-image: url('./images/main2.jpg');"></div>
+        <!-- Slide 3 -->
+        <div class="hero-slide" style="background-image: url('./images/main3.jpg');"></div>
+        <!-- Slide 4 -->
+        <div class="hero-slide" style="background-image: url('./images/main4.jpg');"></div>
+        <!-- Slide 5 -->
+        <div class="hero-slide" style="background-image: url('./images/main5.jpg');"></div>
+        <!-- Slide 6 -->
+        <div class="hero-slide" style="background-image: url('./images/main6.jpg');"></div>
+        <!-- Slide 7 -->
+        <div class="hero-slide" style="background-image: url('./images/main7.jpg');"></div>
+        
+        <!-- Hero Content -->
+        <div class="hero-content text-center max-w-4xl mx-auto px-4">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 fade-in" data-content="hero_title">Találd meg álmotthonod Costa Blancán</h1>
+            <p class="text-xl md:text-2xl mb-8 fade-in" data-content="hero_subtitle">Fedezd fel a lenyűgöző mediterrán panorámával rendelkező luxusingatlanokat</p>
+            
+            <!-- Search Bar -->
+          <!-- Updated Search Bar in Hero Section -->
+<div class="bg-white bg-opacity-95 backdrop-blur-sm rounded-lg p-6 shadow-xl max-w-4xl mx-auto fade-in" x-data="searchForm()">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div>
+            <label class="block text-gray-700 text-sm font-medium mb-2">Ingatlantípus</label>
+            <select x-model="filters.building_type" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-800 bg-white">
+                <option value="">Összes típus</option>
+                <option value="apartment">Lakás / Apartman</option>
+                <option value="house">Villa / Ház / Ikerház</option>
+                <option value="new_build_villa">Új építésű villa</option>
+                <option value="new_build_apartment">Új építésű apartman</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-gray-700 text-sm font-medium mb-2">Státusz</label>
+            <select x-model="filters.status" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-800 bg-white">
+                <option value="">Összes státusz</option>
+                <option value="for_sale">Eladó</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-gray-700 text-sm font-medium mb-2">Település</label>
+            <select x-model="filters.city" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-800 bg-white">
+                <option value="">Összes terület</option>
+                <option value="Alicante">Alicante</option>
+                <option value="Benidorm">Benidorm</option>
+                <option value="Denia">Denia</option>
+                <option value="Calpe">Calpe</option>
+                <option value="Altea">Altea</option>
+                <option value="Torrevieja">Torrevieja</option>
+                <option value="Finestrat">Finestrat</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-gray-700 text-sm font-medium mb-2">Ár (€)</label>
+            <div class="grid grid-cols-2 gap-2">
+                <input type="number" x-model="filters.price_min" placeholder="Min" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-800 bg-white">
+                <input type="number" x-model="filters.price_max" placeholder="Max" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-800 bg-white">
+            </div>
+        </div>
+        <div class="flex items-end">
+            <button @click="searchProperties()" class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
+                <span class="material-icons mr-2">search</span>
+                <span>Ingatlan keresése</span>
+            </button>
+        </div>
+    </div>
+</div>
+        </div>
+    </section>
+
+    <!-- Properties Section -->
+    <section id="properties" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 scroll-reveal">
+                <h2 class="text-4xl font-bold mb-4" data-content="properties_title">Kiemelt ingatlanok</h2>
+                <p class="text-xl text-gray-600" data-content="properties_subtitle">Fedezd fel válogatott prémium ingatlanjainkat</p>
+            </div>
+
+            <!-- Advanced Filters -->
+            <div class="bg-white rounded-lg p-6 shadow-lg mb-12 scroll-reveal" x-data="advancedFilters()">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold">Részletes szűrők</h3>
+                    <button @click="showFilters = !showFilters" class="text-blue-600 hover:text-blue-700">
+                        <span class="material-icons" x-text="showFilters ? 'expand_less' : 'expand_more'"></span>
+                    </button>
+                </div>
+                
+                <div x-show="showFilters" x-transition class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div>
+        <label class="block text-sm font-medium mb-1">Ingatlan azonosító</label>
+        <input type="text" x-model="filters.property_id_code" placeholder="Írja be az azonosítót" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+    </div>
+    <div>
+        <label class="block text-sm font-medium mb-1">Alapterület (m²)</label>
+        <input type="number" x-model="filters.size_min" placeholder="Min. Terület" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+    </div>
+    <div>
+        <label class="block text-sm font-medium mb-1">Szobák száma</label>
+        <input type="number" x-model="filters.rooms" placeholder="Szobák száma" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+    </div>
+    <div>
+        <label class="block text-sm font-medium mb-1">Állapot</label>
+        <select x-model="filters.overall_condition" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+            <option value="">Bármilyen állapot</option>
+            <option value="excellent">Kiváló</option>
+            <option value="good">Jó</option>
+            <option value="fair">Közepes</option>
+            <option value="needs_renovation">Felújítandó</option>
+        </select>
+    </div>
+    <div>
+        <label class="block text-sm font-medium mb-1">Felszereltség</label>
+        <div class="space-y-1">
+            <label class="flex items-center">
+                <input type="checkbox" x-model="filters.furnished" class="mr-2">
+                <span class="text-sm">Bútorozott</span>
+            </label>
+            <label class="flex items-center">
+                <input type="checkbox" x-model="filters.garden" class="mr-2">
+                <span class="text-sm">Kert</span>
+            </label>
+            <label class="flex items-center">
+                <input type="checkbox" x-model="filters.terrace" class="mr-2">
+                <span class="text-sm">Terasz</span>
+            </label>
+        </div>
+    </div>
+    <div class="flex items-end">
+        <button @click="applyFilters()" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition-colors">
+            Szűrés alkalmazása
+        </button>
+    </div>
+</div>
+            </div>
+
+            <!-- Properties Grid -->
+            <div id="properties-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 scroll-reveal">
+                <!-- Properties will be loaded here via JavaScript -->
+            </div>
+
+            <!-- Load More Button -->
+            <div class="text-center mt-12">
+                <button id="load-more" class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors" data-content="load_more_text">
+                    További ingatlanok betöltése
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Costa Blanca Showcase -->
+    <section id="costa-blanca" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="scroll-reveal">
+                    <h2 class="text-4xl font-bold mb-6" data-content="costa_blanca_title">Fedezd fel Costa Blancát</h2>
+                    <p class="text-lg text-gray-600 mb-6" data-content="costa_blanca_description">
+                        Costa Blanca, Spanyolország lenyűgöző „Fehér Partja", páratlan életstílust kínál: érintetlen strandok, egész éves napsütés és gazdag kulturális örökség.
+                        A pezsgő Alicante városától a bájos Altea és Calpe településekig tökéletesen ötvözi a kikapcsolódást és a kalandot.
+                    </p>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <span class="material-icons text-blue-600 mr-3">wb_sunny</span>
+                            <span data-content="feature_sunshine">Évente több mint 300 nap napsütés</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="material-icons text-blue-600 mr-3">beach_access</span>
+                            <span data-content="feature_beaches">Érintetlen strandok és kristálytiszta víz</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="material-icons text-blue-600 mr-3">trending_up</span>
+                            <span data-content="feature_investment">Erős befektetési potenciál és magas bérleti hozam</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="material-icons text-blue-600 mr-3">restaurant</span>
+                            <span data-content="feature_dining">Világszínvonalú éttermek és mediterrán konyha</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 scroll-reveal">
+                    <img src="./images/main4.jpg" 
+                         alt="Costa Blanca Beach" class="rounded-lg shadow-lg h-64 object-cover">
+                    <img src="./images/main5.jpg" 
+                         alt="Spanish Villa" class="rounded-lg shadow-lg h-64 object-cover">
+                    <img src="./images/main6.jpg" 
+                         alt="Alicante Harbor" class="rounded-lg shadow-lg h-64 object-cover">
+                    <img src="./images/main7.jpg" 
+                         alt="Spanish Architecture" class="rounded-lg shadow-lg h-64 object-cover">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-gray-50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="scroll-reveal">
+                <img src="./images/unnamed.jpg" 
+                     alt="Agent Photo" class="w-48 h-48 rounded-full mx-auto mb-8 object-cover shadow-lg">
+                
+                <h2 class="text-4xl font-bold mb-4">Ismerd meg <span data-content="about_name">Balogh Esztert</span></h2>
+                <p class="text-xl text-blue-600 mb-6" data-content="about_title">Megbízható ingatlanszakértőd</p>
+                
+                <div class="text-lg text-gray-600 mb-8 max-w-3xl mx-auto" data-content="about_description">
+                    Több mint 15 éves costa blancai ingatlanpiaci tapasztalattal nemzetközi ügyfeleknek segítek megtalálni a tökéletes otthont vagy befektetést Spanyolországban.
+                    Mély helyismeretem, többnyelvű kommunikációm és ügyfélközpontú hozzáállásom garantálja a gördülékeny és sikeres ügyintézést.
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                    <div class="text-center">
+                        <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="material-icons text-blue-600 text-2xl">verified</span>
+                        </div>
+                        <h3 class="font-semibold mb-2" data-content="about_feature_1_title">Engedéllyel rendelkező szakember</h3>
+                        <p class="text-gray-600" data-content="about_feature_1_desc">Teljes körű engedéllyel és tanúsítvánnyal rendelkező ingatlanügynök</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="material-icons text-blue-600 text-2xl">language</span>
+                        </div>
+                        <h3 class="font-semibold mb-2" data-content="about_feature_2_title">Többnyelvű szolgáltatás</h3>
+                        <p class="text-gray-600" data-content="about_feature_2_desc">Folyékony angol, spanyol, német és francia nyelvtudás</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="material-icons text-blue-600 text-2xl">support_agent</span>
+                        </div>
+                        <h3 class="font-semibold mb-2" data-content="about_feature_3_title">24/7 Support</h3>
+                        <p class="text-gray-600" data-content="about_feature_3_desc">0–24 órás ügyféltámogatás</p>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center space-x-4">
+                    <a href="tel:+36706310000" data-dynamic="true" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                        <span class="material-icons mr-2">phone</span>
+                        Hívj most
+                    </a>
+                    <a href="#contact" class="border border-blue-600 text-blue-600 px-6 py-3 rounded-lg hover:bg-blue-50 transition-colors flex items-center">
+                        <span class="material-icons mr-2">email</span>
+                        Üzenet küldése
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 bg-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 scroll-reveal">
+                <h2 class="text-4xl font-bold mb-4" data-content="contact_title">Lépj kapcsolatba velünk</h2>
+                <p class="text-xl text-gray-600" data-content="contact_subtitle">Készen állsz megtalálni álomingatlanod? Beszéljünk!</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Contact Form -->
+                <div class="scroll-reveal" x-data="contactForm()">
+                    <form @submit.prevent="submitForm()" class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2" data-content="contact_form_name">Teljes név</label>
+                            <input type="text" x-model="form.name" required 
+                                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2" data-content="contact_form_email">E-mail cím</label>
+                            <input type="email" x-model="form.email" required 
+                                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2" data-content="contact_form_phone">Telefonszám</label>
+                            <input type="tel" x-model="form.phone" 
+                                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2" data-content="contact_form_message">Üzenet</label>
+                            <textarea x-model="form.message" rows="5" required 
+                                      class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                        </div>
+                        <button type="submit" :disabled="submitting" 
+                                class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50">
+                            <span x-show="!submitting" data-content="contact_form_submit">Küldés</span>
+                            <span x-show="submitting">Küldés...</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="scroll-reveal">
+                    <div class="space-y-8">
+                        <div class="flex items-start">
+                            <div class="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                                <span class="material-icons text-blue-600">location_on</span>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold mb-2" data-content="contact_address_title">Irodacím</h3>
+                                <p class="text-gray-600" data-content="contact_address">Calles Sierra Dorada 19.<br>03503 Benidorm, Spain</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                                <span class="material-icons text-blue-600">phone</span>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold mb-2" data-content="contact_phone_title">Telefon</h3>
+                                <p class="text-gray-600" data-content="contact_phone">+36706310000</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                                <span class="material-icons text-blue-600">email</span>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold mb-2" data-content="contact_email_title">E-mail</h3>
+                                <p class="text-gray-600" data-content="contact_email">info@besthomesespana.com</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                                <span class="material-icons text-blue-600">schedule</span>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold mb-2" data-content="contact_hours_title">Nyitvatartás</h3>
+                                <p class="text-gray-600" data-content="contact_hours">Hétfő–Péntek: 10:00–18:00<br>Szombat: 10:00–14:00</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Google Maps -->
+                    <div class="mt-8">
+                        <div class="bg-gray-200 h-64 rounded-lg flex items-center justify-center">
+                            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d50057.83392607042!2d-0.5137236465017142!3d38.35790089723687!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd6235da3b9dab4b%3A0x1d7da872ac0b81e3!2sAlacant%2C%20Alicante%2C%20Spanyolorsz%C3%A1g!5e0!3m2!1shu!2shu!4v1755262877123!5m2!1shu!2shu" width="400" height="258" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
+                <div>
+                    <h3 class="text-2xl font-bold mb-4" data-content="footer_company_name">Best Homes Espana</h3>
+                    <p class="text-gray-400" data-content="footer_company_desc">A te megbízható ingatlan értékesítőd, Costa Blanca, Spain.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4" data-content="footer_quicklinks_title">Gyorslinkek</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#home" class="hover:text-white" data-content="nav_home">Főoldal</a></li>
+                        <li><a href="#properties" class="hover:text-white" data-content="nav_properties">Ingatlanok</a></li>
+                        <li><a href="#about" class="hover:text-white" data-content="nav_about">Rólunk</a></li>
+                        <li><a href="./blog.html" class="hover:text-white">Blog</a></li>
+                        <li><a href="#contact" class="hover:text-white" data-content="nav_contact">Kapcsolat</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4" data-content="footer_services_title">Szolgáltatások</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li data-content="footer_service_1">Ingatlanértékesítés</li>
+                        <li data-content="footer_service_2">Ingatlanbérbeadás</li>
+                        <li data-content="footer_service_3">Befektetési tanácsadás</li>
+                        <li data-content="footer_service_4">Ingatlankezelés</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Elérhetőségek</h4>
+                    <div class="space-y-2 text-gray-400">
+                        <p data-content="contact_phone">+36706310000</p>
+                        <p data-content="contact_email">info@besthomesespana.com</p>
+                        <p>Benidorm, Spain</p>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Jogi információk</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="./laws/privacy.html" class="hover:text-white">Adatvédelmi irányelvek</a></li>
+                        <li><a href="./laws/cookies.html" class="hover:text-white">Cookie szabályzat</a></li>
+                        <li><a href="./laws/terms.html" class="hover:text-white">Felhasználási feltételek</a></li>
+                        <li><a href="./laws/impresszum.html" class="hover:text-white">Impresszum</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p data-content="footer_copyright">&copy; 2025 Best Homes Espana. Minden jog fenntartva.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Dynamic Content Loader -->
+    <script>
+        // Dynamic Content Loader - same as previous artifact
+        class ContentLoader {
+            constructor() {
+                this.cache = new Map();
+                this.loading = false;
+            }
+
+            async loadPageContent(page) {
+                if (this.loading) return;
+                
+                try {
+                    this.loading = true;
+                    
+                    if (this.cache.has(page)) {
+                        this.applyContent(this.cache.get(page));
+                        return;
+                    }
+
+                    const response = await fetch(`api/get_content.php?page=${page}&grouped=true`);
+                    if (response.ok) {
+                        const content = await response.json();
+                        this.cache.set(page, content);
+                        this.applyContent(content);
+                    } else {
+                        console.warn(`Failed to load content for page: ${page}`);
+                    }
+                } catch (error) {
+                    console.error('Error loading page content:', error);
+                } finally {
+                    this.loading = false;
+                }
+            }
+
+            async loadMultipleContent(keys) {
+                try {
+                    const response = await fetch(`api/get_content.php?multiple=${keys.join(',')}`);
+                    if (response.ok) {
+                        const content = await response.json();
+                        this.applyContentByKeys(content);
+                        return content;
+                    }
+                } catch (error) {
+                    console.error('Error loading multiple content:', error);
+                }
+                return {};
+            }
+
+            applyContent(groupedContent) {
+                Object.keys(groupedContent).forEach(group => {
+                    const sections = groupedContent[group];
+                    Object.keys(sections).forEach(sectionKey => {
+                        const section = sections[sectionKey];
+                        this.applySingleContent(sectionKey, section);
+                    });
+                });
+            }
+
+            applyContentByKeys(content) {
+                Object.keys(content).forEach(sectionKey => {
+                    const section = content[sectionKey];
+                    this.applySingleContent(sectionKey, section);
+                });
+            }
+
+            applySingleContent(sectionKey, section) {
+                const elements = document.querySelectorAll(`[data-content="${sectionKey}"]`);
+                
+                elements.forEach(element => {
+                    if (section.content_type === 'html') {
+                        element.innerHTML = section.content_value;
+                    } else {
+                        element.textContent = section.content_value;
+                    }
+                });
+
+                this.handleSpecialContent(sectionKey, section);
+            }
+
+            handleSpecialContent(sectionKey, section) {
+                const value = section.content_value;
+
+                if (sectionKey === 'contact_phone') {
+                    const phoneLinks = document.querySelectorAll('a[href^="tel:"][data-dynamic="true"]');
+                    phoneLinks.forEach(link => {
+                        link.href = `tel:${value}`;
+                    });
+                }
+
+                if (sectionKey === 'contact_email') {
+                    const emailLinks = document.querySelectorAll('a[href^="mailto:"][data-dynamic="true"]');
+                    emailLinks.forEach(link => {
+                        link.href = `mailto:${value}`;
+                    });
+                }
+
+                if (sectionKey === 'hero_title') {
+                    const titleTag = document.querySelector('title[data-content="hero_title"]');
+                    if (titleTag) {
+                        titleTag.textContent = `${value} - Best Homes Espana`;
+                    }
+                }
+            }
+
+            clearCache() {
+                this.cache.clear();
+            }
+
+            async refreshContent(page) {
+                this.cache.delete(page);
+                return this.loadPageContent(page);
+            }
+        }
+
+        const contentLoader = new ContentLoader();
+
+        function getCurrentPage() {
+            const path = window.location.pathname;
+            
+            if (path.includes('property-detail.html')) {
+                return 'property_detail';
+            } else if (path.includes('index.html') || path === '/' || path === '') {
+                return 'home';
+            }
+            
+            return 'home';
+        }
+
+        window.updateContent = async function(sectionKey) {
+            return contentLoader.loadSingleContent(sectionKey);
+        };
+
+        window.refreshAllContent = async function() {
+            contentLoader.clearCache();
+            const currentPage = getCurrentPage();
+            await contentLoader.loadPageContent('navigation');
+            await contentLoader.loadPageContent('footer');
+            await contentLoader.loadPageContent(currentPage);
+            await contentLoader.loadPageContent('contact');
+        };
+    </script>
+
+    <!-- JavaScript -->
+    <!-- JavaScript -->
+    <script>
+        // Global variables
+        let currentPage = 1;
+        let isLoading = false;
+        let slideIndex = 0;
+
+        // Hero slider functionality
+        function initHeroSlider() {
+            const slides = document.querySelectorAll('.hero-slide');
+            const totalSlides = slides.length;
+
+            function showSlide(index) {
+                slides.forEach((slide, i) => {
+                    slide.classList.remove('active');
+                    if (i === index) {
+                        slide.classList.add('active');
+                    }
+                });
+            }
+
+            function nextSlide() {
+                slideIndex = (slideIndex + 1) % totalSlides;
+                showSlide(slideIndex);
+            }
+
+            setInterval(nextSlide, 5000);
+        }
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('navbar-scroll');
+            } else {
+                navbar.classList.remove('navbar-scroll');
+            }
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Scroll reveal animation
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.scroll-reveal').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Updated search form functionality
+        function searchForm() {
+            return {
+                filters: {
+                    building_type: '',
+                    status: '',
+                    city: '',
+                    price_min: '',
+                    price_max: ''
+                },
+                searchProperties() {
+                    loadProperties(1, this.filters);
+                    document.getElementById('properties').scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        }
+
+        // Updated advanced filters functionality
+        function advancedFilters() {
+            return {
+                showFilters: false,
+                filters: {
+                    property_id_code: '',
+                    size_min: '',
+                    rooms: '',
+                    overall_condition: '',
+                    furnished: false,
+                    garden: false,
+                    terrace: false
+                },
+                applyFilters() {
+                    // Combine with main search filters
+                    const allFilters = { 
+                        ...this.filters
+                        // Add any main search bar filters here if needed
+                    };
+                    loadProperties(1, allFilters);
+                }
+            }
+        }
+
+        // Contact form functionality
+        function contactForm() {
+            return {
+                form: {
+                    name: '',
+                    email: '',
+                    phone: '',
+                    message: ''
+                },
+                submitting: false,
+                async submitForm() {
+                    this.submitting = true;
+                    try {
+                        const response = await fetch('api/contact.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(this.form)
+                        });
+                        
+                        if (response.ok) {
+                            alert('Message sent successfully!');
+                            this.form = { name: '', email: '', phone: '', message: '' };
+                        } else {
+                            alert('Error sending message. Please try again.');
+                        }
+                    } catch (error) {
+                        alert('Error sending message. Please try again.');
+                    }
+                    this.submitting = false;
+                }
+            }
+        }
+
+        // Updated helper functions for building type and status labels
+        function getBuildingTypeLabel(type) {
+            const typeLabels = {
+                'apartment': 'Lakás / Apartman',
+                'house': 'Villa / Ház / Ikerház',
+                'new_build_villa': 'Új építésű villa',
+                'new_build_apartment': 'Új építésű apartman'
+            };
+            return typeLabels[type] || type;
+        }
+
+        function getStatusLabel(status) {
+            const statusLabels = {
+                'for_sale': 'Eladó',
+                'sold': 'Elkelt'
+            };
+            return statusLabels[status] || status;
+        }
+
+        // Load properties function
+        async function loadProperties(page = 1, filters = {}) {
+            if (isLoading) return;
+            isLoading = true;
+
+            try {
+                const queryParams = new URLSearchParams();
+                queryParams.append('page', page);
+                queryParams.append('limit', 9);
+
+                Object.keys(filters).forEach(key => {
+                    if (filters[key] && filters[key] !== '') {
+                        queryParams.append(key, filters[key]);
+                    }
+                });
+
+                const response = await fetch(`api/properties.php?${queryParams}`);
+                const data = await response.json();
+
+                const grid = document.getElementById('properties-grid');
+                
+                if (page === 1) {
+                    grid.innerHTML = '';
+                    currentPage = 1;
+                }
+
+                if (data.properties && data.properties.length > 0) {
+                    data.properties.forEach(property => {
+                        grid.appendChild(createPropertyCard(property));
+                    });
+
+                    const loadMoreBtn = document.getElementById('load-more');
+                    if (data.has_more) {
+                        loadMoreBtn.style.display = 'block';
+                        currentPage = page;
+                    } else {
+                        loadMoreBtn.style.display = 'none';
+                    }
+                } else if (page === 1) {
+                    grid.innerHTML = '<div class="col-span-full text-center py-12"><p class="text-gray-500 text-lg">No properties found matching your criteria.</p></div>';
+                }
+            } catch (error) {
+                console.error('Error loading properties:', error);
+            }
+            
+            isLoading = false;
+        }
+
+        // Updated helper functions for building type and status labels
+        function getBuildingTypeLabel(type) {
+            const typeLabels = {
+                'apartment': 'Lakás / Apartman',
+                'house': 'Villa / Ház / Ikerház',
+                'new_build_villa': 'Új építésű villa',
+                'new_build_apartment': 'Új építésű apartman'
+            };
+            return typeLabels[type] || type;
+        }
+
+        function getStatusLabel(status) {
+            const statusLabels = {
+                'for_sale': 'Eladó',
+                'sold': 'Elkelt'
+            };
+            return statusLabels[status] || status;
+        }
+
+        // Updated createPropertyCard function
+        function createPropertyCard(property) {
+            const card = document.createElement('div');
+            card.className = 'property-card bg-white rounded-lg shadow-lg overflow-hidden';
+            
+            const imageUrl = property.images && property.images.length > 0 
+                ? property.images[0] 
+                : 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+
+            // Updated status colors (removed new_build from status)
+            const statusColor = {
+                'for_sale': 'bg-green-500',
+                'sold': 'bg-gray-500'
+            }[property.status] || 'bg-gray-500';
+
+            // Updated status text (removed new_build from status)
+            const statusText = {
+                'for_sale': 'Eladó',
+                'sold': 'Elkelt'
+            }[property.status] || property.status;
+
+            // Get building type label
+            const buildingTypeLabel = getBuildingTypeLabel(property.building_type);
+
+            card.innerHTML = `
+                <div class="relative">
+                    <img src="${imageUrl}" alt="${property.title}" class="w-full h-64 object-cover">
+                    <div class="absolute top-4 left-4">
+                        <span class="${statusColor} text-white px-3 py-1 rounded-full text-sm font-medium">${statusText}</span>
+                    </div>
+                    ${property.building_type === 'new_build_villa' || property.building_type === 'new_build_apartment' ? `
+                    <div class="absolute top-4 right-4">
+                        <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">${buildingTypeLabel}</span>
+                    </div>` : `
+                    <div class="absolute top-4 right-4 bg-white px-2 py-1 rounded text-sm font-medium">
+                        ID: ${property.property_id_code || property.id}
+                    </div>`}
+                </div>
+                <div class="property-card-content">
+                    <div class="property-card-info">
+                        <h3 class="text-xl font-semibold mb-2">${property.title}</h3>
+                        <p class="text-gray-600 mb-4 flex-grow">${property.description ? property.description.substring(0, 100) + '...' : ''}</p>
+                        
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-2xl font-bold text-blue-600">€${Number(property.price).toLocaleString()}</span>
+                            <span class="text-gray-500">${property.city || property.neighborhood || ''}</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-4 mb-4 text-sm text-gray-600">
+                            ${property.size_ownership_doc ? `
+                            <div class="flex items-center">
+                                <span class="material-icons text-xs mr-1">square_foot</span>
+                                <span>${property.size_ownership_doc} m²</span>
+                            </div>` : ''}
+                            ${property.building_type ? `
+                            <div class="flex items-center">
+                                <span class="material-icons text-xs mr-1">home</span>
+                                <span>${buildingTypeLabel}</span>
+                            </div>` : ''}
+                            ${property.overall_condition ? `
+                            <div class="flex items-center">
+                                <span class="material-icons text-xs mr-1">verified</span>
+                                <span>${property.overall_condition}</span>
+                            </div>` : ''}
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            ${property.furnished ? '<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">Furnished</span>' : ''}
+                            ${property.garden ? '<span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Garden</span>' : ''}
+                            ${property.terrace ? '<span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">Terrace</span>' : ''}
+                            ${property.parking ? '<span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">Parking</span>' : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="property-card-button">
+                        <button onclick="viewProperty(${property.id})" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        document.getElementById('type').addEventListener('change', function() {
+    const selectedValue = this.value;
+    
+    if (selectedValue === 'new_build_villa' || selectedValue === 'new_build_apartment') {
+        window.location.href = `new-build-properties.php?type=${encodeURIComponent(selectedValue)}`;
+    } else {
+        // Your existing logic for other property types
+        window.location.href = `properties.php?type=${encodeURIComponent(selectedValue)}`;
+    }
+});
+
+        // View property details
+        function viewProperty(id) {
+            window.location.href = `property-detail.html?id=${id}`;
+        }
+
+        // Load more properties
+        document.getElementById('load-more').addEventListener('click', () => {
+            loadProperties(currentPage + 1);
+        });
+
+        // Initialize page with dynamic content loading
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load dynamic content first
+            await contentLoader.loadPageContent('navigation');
+            await contentLoader.loadPageContent('footer');
+            await contentLoader.loadPageContent('home');
+            await contentLoader.loadPageContent('contact');
+            
+            // Then initialize other functionality
+            initHeroSlider();
+            loadProperties();
+        });
+    </script>
+</body>
+</html>

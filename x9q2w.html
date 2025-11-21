@@ -1,0 +1,2058 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingatlan Admin Felület</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Sortable.js for drag and drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        .sidebar-transition {
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .image-preview {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .image-preview:hover {
+            border-color: #3b82f6;
+        }
+
+        .image-preview.sortable-ghost {
+            opacity: 0.4;
+        }
+
+        .image-preview.sortable-chosen {
+            transform: scale(1.05);
+        }
+
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .image-preview:hover .image-overlay {
+            opacity: 1;
+        }
+
+        .drag-handle {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 4px;
+            padding: 4px;
+            cursor: move;
+        }
+
+        .image-order {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-gray-50" x-data="adminApp()" x-init="init()">
+    
+    <!-- Login Modal -->
+    <div x-show="!isLoggedIn" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 fade-in">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Admin bejelentkezés</h2>
+                <p class="text-gray-600 mt-2">Add meg a bejelentkezési adataid az admin felület eléréséhez</p>
+            </div>
+            
+            <form @submit.prevent="login()" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Felhasználónév</label>
+                    <input type="text" x-model="loginForm.username" required 
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Jelszó</label>
+                    <input type="password" x-model="loginForm.password" required 
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <button type="submit" :disabled="loginLoading" 
+                        class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50">
+                    <span x-show="!loginLoading">Bejelentkezés</span>
+                    <span x-show="loginLoading">Bejelentkezés...</span>
+                </button>
+                
+                <div x-show="loginError" class="text-red-600 text-sm text-center" x-text="loginError"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Admin Interface -->
+    <div x-show="isLoggedIn" class="min-h-screen">
+        <!-- Sidebar -->
+        <div class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg sidebar-transition" 
+             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
+            <div class="p-6 border-b">
+                <h1 class="text-xl font-bold text-gray-800">Admin felület</h1>
+                <p class="text-sm text-gray-600" x-text="'Üdv, ' + admin.username"></p>
+            </div>
+            
+            <nav class="mt-6">
+                <a @click="setActiveTab('dashboard')" 
+                   class="flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer"
+                   :class="activeTab === 'dashboard' ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : ''">
+                    <span class="material-icons mr-3">dashboard</span>
+                    Vezérlőpult
+                </a>
+                
+                <a @click="setActiveTab('properties')" 
+                   class="flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer"
+                   :class="activeTab === 'properties' ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : ''">
+                    <span class="material-icons mr-3">home</span>
+                    Ingatlanok
+                </a>
+                
+                <a @click="setActiveTab('contacts')" 
+                   class="flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer"
+                   :class="activeTab === 'contacts' ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : ''">
+                    <span class="material-icons mr-3">message</span>
+                    Kapcsolati üzenetek
+                </a>
+
+                <!-- CONTENT MANAGEMENT TAB -->
+                <a @click="setActiveTab('content')" 
+                   class="flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer"
+                   :class="activeTab === 'content' ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : ''">
+                    <span class="material-icons mr-3">edit</span>
+                    Tartalom kezelés
+                </a>
+
+                <a @click="setActiveTab('blog')" 
+   class="flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer"
+   :class="activeTab === 'blog' ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : ''">
+    <span class="material-icons mr-3">article</span>
+    Blog kezelés
+</a>
+            </nav>
+            
+            <div class="absolute bottom-0 w-full p-6 border-t">
+                <button @click="logout()" class="w-full flex items-center justify-center px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                    <span class="material-icons mr-2">logout</span>
+                    Kijelentkezés
+                </button>
+            </div>
+        </div>
+
+       
+        <!-- Blog Management Tab -->
+<div x-show="activeTab === 'blog'" class="p-6 fade-in">
+    <div class="max-w-full">
+    <!-- Blog Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+        <div>
+            <h3 class="text-lg font-semibold text-gray-800">Blog kezelés</h3>
+            <p class="text-gray-600">Kezeld a blogbejegyzéseidet</p>
+        </div>
+        <button @click="showBlogForm = true; editingBlogPost = null; resetBlogForm()" 
+                class="mt-4 sm:mt-0 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+            <span class="material-icons mr-2">add</span>
+            Új blogbejegyzés
+        </button>
+    </div>
+
+    <!-- Blog Filters -->
+    <div class="bg-white rounded-lg shadow p-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Státusz szűrése</label>
+                <select x-model="blogFilters.status" @change="loadBlogPosts()" 
+                        class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                    <option value="">Összes státusz</option>
+                    <option value="draft">Piszkozat</option>
+                    <option value="published">Publikált</option>
+                    <option value="scheduled">Ütemezett</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Keresés</label>
+                <input type="text" x-model="blogFilters.search" @input="loadBlogPosts()" 
+                       placeholder="Cím vagy tartalomban..." 
+                       class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex items-end">
+                <button @click="loadBlogPosts()" 
+                        class="w-full bg-gray-600 text-white p-2 rounded hover:bg-gray-700 transition-colors">
+                    Szűrés
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blog Posts Table -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full table-auto">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Blogbejegyzés</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Státusz</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Publikálás</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Létrehozva</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Műveletek</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    <template x-for="post in blogPosts" :key="post.id">
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="h-8 w-8 bg-gray-200 rounded-lg mr-3 flex items-center justify-center flex-shrink-0">
+                                        <span class="material-icons text-gray-500 text-sm">article</span>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="text-sm font-medium text-gray-900 truncate" x-text="post.title"></div>
+                                        <div class="text-sm text-gray-500 truncate" x-text="post.slug"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full"
+                                      :class="post.status === 'published' ? 'bg-green-100 text-green-800' : 
+                                             post.status === 'scheduled' ? 'bg-blue-100 text-blue-800' : 
+                                             'bg-gray-100 text-gray-800'"
+                                      x-text="getBlogStatusLabel(post.status)"></span>
+                            </td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500" x-text="new Date(post.publish_at).toLocaleDateString('hu-HU')"></td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500" x-text="new Date(post.created_at).toLocaleDateString('hu-HU')"></td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex items-center space-x-2">
+                                    <button @click="editBlogPost(post)" class="text-blue-600 hover:text-blue-900" title="Szerkesztés">
+                                        <span class="material-icons text-sm">edit</span>
+                                    </button>
+                                    <button @click="deleteBlogPost(post.id)" class="text-red-600 hover:text-red-900" title="Törlés">
+                                        <span class="material-icons text-sm">delete</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
+                    
+                    <!-- Empty State -->
+                    <tr x-show="blogPosts.length === 0">
+                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                            <span class="material-icons text-4xl mb-2 block text-gray-300">article</span>
+                            Nincsenek blogbejegyzések
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Blog Form Modal -->
+<div x-show="showBlogForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg max-w-6xl w-full max-h-screen overflow-y-auto">
+        <div class="p-6 border-b flex items-center justify-between">
+            <h3 class="text-lg font-semibold" x-text="editingBlogPost ? 'Blogbejegyzés szerkesztése' : 'Új blogbejegyzés létrehozása'"></h3>
+            <button @click="showBlogForm = false" class="text-gray-400 hover:text-gray-600">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        
+        <form @submit.prevent="saveBlogPost()" class="p-6 space-y-6">
+            <!-- Basic Information -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Cím *</label>
+                    <input type="text" x-model="blogForm.title" required 
+                           @input="generateSlug()"
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Slug (URL) *</label>
+                    <input type="text" x-model="blogForm.slug" required 
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <p class="text-xs text-gray-500 mt-1">URL-barát azonosító (automatikusan generálódik)</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Státusz *</label>
+                    <select x-model="blogForm.status" required
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="draft">Piszkozat</option>
+                        <option value="published">Publikált</option>
+                        <option value="scheduled">Ütemezett</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Publikálás dátuma</label>
+                    <input type="datetime-local" x-model="blogForm.publish_at"
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <!-- Excerpt -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Kivonat</label>
+                <textarea x-model="blogForm.excerpt" rows="3" 
+                          placeholder="Rövid leírás a blogbejegyzésről..."
+                          class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+            </div>
+
+            <!-- Content -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tartalom *</label>
+                <textarea x-model="blogForm.content" rows="12" required 
+                          placeholder="HTML tartalom... (használhatod a <p>, <h1>, <h2>, <strong>, <em>, <ul>, <li> tageket)"
+                          class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-sm"></textarea>
+                <p class="text-xs text-gray-500 mt-1">Használhatod a HTML tageket a formázáshoz</p>
+            </div>
+
+            <!-- Cover Image -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Borítókép</label>
+                
+                <!-- Current Image -->
+                <div x-show="blogForm.cover_image" class="mb-4">
+                    <img :src="blogForm.cover_image" alt="Borítókép" class="w-32 h-32 object-cover rounded-lg">
+                    <button type="button" @click="blogForm.cover_image = ''" 
+                            class="mt-2 text-red-600 hover:text-red-800 text-sm">
+                        Kép eltávolítása
+                    </button>
+                </div>
+
+                <!-- Image Upload -->
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                    <input type="file" 
+                           id="blogImageUpload" 
+                           accept="image/*" 
+                           @change="handleBlogImageUpload($event)"
+                           class="hidden">
+                    <label for="blogImageUpload" class="cursor-pointer">
+                        <span class="material-icons text-4xl text-gray-400 mb-2 block">cloud_upload</span>
+                        <p class="text-gray-600">Kattints ide vagy húzd ide a borítóképet</p>
+                        <p class="text-sm text-gray-500 mt-1">Támogatott formátumok: JPG, PNG, GIF, WebP (max. 10MB)</p>
+                    </label>
+                </div>
+
+                <!-- Upload Progress -->
+                <div x-show="blogImageUpload.show" class="mt-4">
+                    <div class="bg-gray-200 rounded-full h-2">
+                        <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                             :style="'width: ' + blogImageUpload.percent + '%'"></div>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1" x-text="blogImageUpload.text"></p>
+                </div>
+            </div>
+
+            <!-- SEO Fields -->
+            <div class="border-t pt-6">
+                <h4 class="text-lg font-semibold text-gray-800 mb-4">SEO beállítások</h4>
+                
+                <div class="grid grid-cols-1 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">SEO cím</label>
+                        <input type="text" x-model="blogForm.seo_title" 
+                               placeholder="Ha üresen hagyod, a fő címet használja"
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-gray-500 mt-1">Optimális hossz: 50-60 karakter</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">SEO leírás</label>
+                        <textarea x-model="blogForm.seo_description" rows="3" 
+                                  placeholder="Ha üresen hagyod, a kivonatot használja"
+                                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                        <p class="text-xs text-gray-500 mt-1">Optimális hossz: 150-160 karakter</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex justify-end space-x-4 pt-6 border-t">
+                <button type="button" @click="showBlogForm = false" 
+                        class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                    Mégse
+                </button>
+                <button type="submit" :disabled="blogFormLoading" 
+                        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                    <span x-show="!blogFormLoading" x-text="editingBlogPost ? 'Blogbejegyzés frissítése' : 'Blogbejegyzés létrehozása'"></span>
+                    <span x-show="blogFormLoading">Mentés...</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+        <!-- Main Content -->
+        <div class="lg:ml-64">
+            <!-- Top Bar -->
+            <div class="bg-white shadow-sm border-b px-6 py-4 flex items-center justify-between">
+                <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden">
+                    <span class="material-icons">menu</span>
+                </button>
+                
+                <h2 class="text-2xl font-semibold text-gray-800" x-text="getTabTitle()"></h2>
+                
+                <a href="index.html" class="flex items-center text-blue-600 hover:text-blue-700">
+                    <span class="material-icons mr-1">launch</span>
+                    Weboldal megnyitása
+                </a>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div x-show="activeTab === 'dashboard'" class="p-6 fade-in">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-blue-100 rounded-lg">
+                                <span class="material-icons text-blue-600">home</span>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Összes ingatlan</p>
+                                <p class="text-2xl font-semibold text-gray-900" x-text="dashboardStats.total_properties || 0"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-green-100 rounded-lg">
+                                <span class="material-icons text-green-600">sell</span>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Aktív hirdetések</p>
+                                <p class="text-2xl font-semibold text-gray-900" x-text="dashboardStats.active_listings || 0"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-yellow-100 rounded-lg">
+                                <span class="material-icons text-yellow-600">schedule</span>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Frissen hozzáadva</p>
+                                <p class="text-2xl font-semibold text-gray-900" x-text="dashboardStats.recently_added || 0"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-purple-100 rounded-lg">
+                                <span class="material-icons text-purple-600">message</span>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Üzenetek</p>
+                                <p class="text-2xl font-semibold text-gray-900" x-text="dashboardStats.contact_messages || 0"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Properties -->
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b">
+                        <h3 class="text-lg font-semibold text-gray-800">Legutóbbi ingatlanok</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cím</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ár</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Státusz</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Létrehozva</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <template x-for="property in dashboardStats.recent_properties || []">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="property.title"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">€<span x-text="Number(property.price).toLocaleString()"></span></td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full"
+                                                  :class="property.status === 'for_sale' ? 'bg-green-100 text-green-800' : 
+                                                         property.status === 'new_build' ? 'bg-blue-100 text-blue-800' : 
+                                                         'bg-gray-100 text-gray-800'"
+                                                  x-text="getStatusLabel(property.status)"></span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="new Date(property.created_at).toLocaleDateString()"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Properties Tab -->
+            <div x-show="activeTab === 'properties'" class="p-6 fade-in">
+                <!-- Properties Header -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Ingatlankezelés</h3>
+                        <p class="text-gray-600">Kezeld az ingatlanhirdetéseidet</p>
+                    </div>
+                    <button @click="showPropertyForm = true; editingProperty = null; resetPropertyForm()" 
+                            class="mt-4 sm:mt-0 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                        <span class="material-icons mr-2">add</span>
+                        Új ingatlan
+                    </button>
+                </div>
+
+                <!-- Properties Table -->
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ingatlan</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ár</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Státusz</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Típus</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Műveletek</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <template x-for="property in properties">
+                                    <tr>
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center">
+                                                <div class="h-10 w-10 bg-gray-200 rounded-lg mr-4 flex items-center justify-center">
+                                                    <span class="material-icons text-gray-500">home</span>
+                                                </div>
+                                                <div>
+                                                    <div class="text-sm font-medium text-gray-900" x-text="property.title"></div>
+                                                    <div class="text-sm text-gray-500" x-text="property.city || property.neighborhood"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            €<span x-text="Number(property.price).toLocaleString()"></span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full"
+                                                  :class="property.status === 'for_sale' ? 'bg-green-100 text-green-800' : 
+                                                         property.status === 'new_build' ? 'bg-blue-100 text-blue-800' : 
+                                                         'bg-gray-100 text-gray-800'"
+                                                  x-text="getStatusLabel(property.status)"></span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="getBuildingTypeLabel(property.building_type)"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <button @click="editProperty(property)" class="text-blue-600 hover:text-blue-900 mr-3" title="Szerkesztés">
+                                                <span class="material-icons text-sm">edit</span>
+                                            </button>
+                                            <button @click="deleteProperty(property.id)" class="text-red-600 hover:text-red-900" title="Törlés">
+                                                <span class="material-icons text-sm">delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Messages Tab -->
+            <div x-show="activeTab === 'contacts'" class="p-6 fade-in">
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b">
+                        <h3 class="text-lg font-semibold text-gray-800">Kapcsolati üzenetek</h3>
+                    </div>
+                    <div class="divide-y divide-gray-200">
+                        <template x-for="contact in contacts">
+                            <div class="p-6">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <div class="flex items-center mb-2">
+                                            <h4 class="text-sm font-medium text-gray-900" x-text="contact.name"></h4>
+                                            <span class="ml-2 text-sm text-gray-500" x-text="contact.email"></span>
+                                            <span x-show="contact.phone" class="ml-2 text-sm text-gray-500" x-text="'• ' + contact.phone"></span>
+                                        </div>
+                                        <p class="text-sm text-gray-700" x-text="contact.message"></p>
+                                    </div>
+                                    <div class="text-sm text-gray-500 ml-4" x-text="new Date(contact.created_at).toLocaleDateString()"></div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Management Tab -->
+            <div x-show="activeTab === 'content'" class="p-6 fade-in">
+                <!-- Content Header -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Tartalom kezelés</h3>
+                        <p class="text-gray-600">Szerkeszd a weboldal szövegeit és tartalmait</p>
+                    </div>
+                    <div class="mt-4 sm:mt-0 flex space-x-3">
+                        <button @click="showContentForm = true; editingContent = null; resetContentForm()" 
+                                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                            <span class="material-icons mr-2">add</span>
+                            Új tartalom
+                        </button>
+                        <button @click="exportContent()" 
+                                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center">
+                            <span class="material-icons mr-2">download</span>
+                            Exportálás
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Content Filters -->
+                <div class="bg-white rounded-lg shadow p-4 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Oldal szűrése</label>
+                            <select x-model="contentFilters.page" @change="loadContentSections()" 
+                                    class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                                <option value="">Összes oldal</option>
+                                <option value="home">Főoldal</option>
+                                <option value="navigation">Navigáció</option>
+                                <option value="contact">Kapcsolat</option>
+                                <option value="footer">Lábléc</option>
+                                <option value="property_detail">Ingatlan részletek</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Szekció csoport</label>
+                            <select x-model="contentFilters.section_group" @change="loadContentSections()" 
+                                    class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                                <option value="">Összes csoport</option>
+                                <template x-for="group in availableGroups">
+                                    <option :value="group" x-text="group"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tartalom típusa</label>
+                            <select x-model="contentFilters.content_type" @change="loadContentSections()" 
+                                    class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                                <option value="">Összes típus</option>
+                                <option value="text">Szöveg</option>
+                                <option value="html">HTML</option>
+                                <option value="image">Kép</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button @click="loadContentSections()" 
+                                    class="w-full bg-gray-600 text-white p-2 rounded hover:bg-gray-700 transition-colors">
+                                Szűrés
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content Sections Table -->
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kulcs</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Név</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tartalom</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Oldal</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Típus</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Műveletek</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <template x-for="content in contentSections">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900" x-text="content.section_key"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="content.section_name"></td>
+                                        <td class="px-6 py-4 text-sm text-gray-500 max-w-xs">
+                                            <div class="truncate" x-text="content.content_value.length > 100 ? content.content_value.substring(0, 100) + '...' : content.content_value"></div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="content.page"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full"
+                                                  :class="content.content_type === 'text' ? 'bg-blue-100 text-blue-800' : 
+                                                         content.content_type === 'html' ? 'bg-green-100 text-green-800' : 
+                                                         'bg-purple-100 text-purple-800'"
+                                                  x-text="content.content_type.toUpperCase()"></span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <button @click="quickEditContent(content)" class="text-blue-600 hover:text-blue-900 mr-3" title="Gyors szerkesztés">
+                                                <span class="material-icons text-sm">edit</span>
+                                            </button>
+                                            <button @click="editContent(content)" class="text-green-600 hover:text-green-900 mr-3" title="Teljes szerkesztés">
+                                                <span class="material-icons text-sm">settings</span>
+                                            </button>
+                                            <button @click="deleteContent(content.id)" class="text-red-600 hover:text-red-900" title="Törlés">
+                                                <span class="material-icons text-sm">delete</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Property Form Modal - UPDATED WITH NEW FIELDS -->
+    <div x-show="showPropertyForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg max-w-6xl w-full max-h-screen overflow-y-auto">
+            <div class="p-6 border-b flex items-center justify-between">
+                <h3 class="text-lg font-semibold" x-text="editingProperty ? 'Ingatlan szerkesztése' : 'Új ingatlan hozzáadása'"></h3>
+                <button @click="showPropertyForm = false" class="text-gray-400 hover:text-gray-600">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            
+            <form @submit.prevent="saveProperty()" class="p-6 space-y-6">
+                <!-- Basic Information -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Cím *</label>
+                        <input type="text" x-model="propertyForm.title" required 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Ingatlanazonosító</label>
+                        <input type="text" x-model="propertyForm.property_id_code" 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Leírás</label>
+                    <textarea x-model="propertyForm.description" rows="4" 
+                              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+
+                <!-- Price and Status - UPDATED -->
+                <!-- Updated Property Form Section in Admin Panel -->
+<!-- Price and Status - UPDATED -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Ár (€) *</label>
+        <input type="number" x-model="propertyForm.price" required min="0" step="0.01"
+               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Státusz *</label>
+        <select x-model="propertyForm.status" required
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+            <option value="">Válassz státuszt</option>
+            <option value="for_sale">Eladó</option>
+        </select>
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Ingatlantípus *</label>
+        <select x-model="propertyForm.building_type" required
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+            <option value="">Válassz típust</option>
+            <option value="apartment">Lakás / Apartman</option>
+            <option value="house">Villa / Ház / Ikerház</option>
+            <option value="new_build_villa">Új építésű villa</option>
+            <option value="new_build_apartment">Új építésű apartman</option>
+        </select>
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Település *</label>
+        <select x-model="propertyForm.city" required
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+            <option value="">Válassz települést</option>
+            <option value="Alicante">Alicante</option>
+            <option value="Benidorm">Benidorm</option>
+            <option value="Denia">Denia</option>
+            <option value="Calpe">Calpe</option>
+            <option value="Altea">Altea</option>
+            <option value="Torrevieja">Torrevieja</option>
+            <option value="Finestrat">Finestrat</option>
+        </select>
+    </div>
+</div>
+
+                <!-- Property Details - UPDATED (removed plot size, kept rooms) -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Alapterület (m²)</label>
+                        <input type="number" x-model="propertyForm.size_ownership_doc" min="0" step="0.01"
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Szobák száma</label>
+                        <input type="number" x-model="propertyForm.rooms" min="0" max="20"
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Állapot</label>
+                        <select x-model="propertyForm.overall_condition" 
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="">Válassz állapotot</option>
+                            <option value="excellent">Kiváló</option>
+                            <option value="good">Jó</option>
+                            <option value="fair">Közepes</option>
+                            <option value="needs_renovation">Felújítandó</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Additional Fields -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Kilátás</label>
+                        <input type="text" x-model="propertyForm.view" placeholder="pl.: tengerre néző, hegyi kilátás" 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Építőanyag</label>
+                        <input type="text" x-model="propertyForm.building_material" 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <!-- Features -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <label class="flex items-center">
+                        <input type="checkbox" x-model="propertyForm.furnished" class="mr-2">
+                        <span class="text-sm">Bútorozott</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" x-model="propertyForm.garden" class="mr-2">
+                        <span class="text-sm">Kert</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" x-model="propertyForm.terrace" class="mr-2">
+                        <span class="text-sm">Terasz</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" x-model="propertyForm.parking" class="mr-2">
+                        <span class="text-sm">Parkoló</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" x-model="propertyForm.airbnb_suitable" class="mr-2">
+                        <span class="text-sm">Alkalmas Airbnb-re</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" x-model="propertyForm.utilities" class="mr-2">
+                        <span class="text-sm">Közművek</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" x-model="propertyForm.wheelchair_access" class="mr-2">
+                        <span class="text-sm">Akadálymentesített</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" x-model="propertyForm.insulation" class="mr-2">
+                        <span class="text-sm">Szigetelés</span>
+                    </label>
+                </div>
+
+                <!-- Image Upload Section -->
+                <div class="border-t pt-6">
+                    <h4 class="text-lg font-semibold text-gray-800 mb-4">Képek kezelése</h4>
+                    
+                    <!-- Image Upload -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Új képek feltöltése</label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                            <input type="file" 
+                                   id="imageUpload" 
+                                   multiple 
+                                   accept="image/*" 
+                                   @change="handleImageUpload($event)"
+                                   class="hidden">
+                            <label for="imageUpload" class="cursor-pointer">
+                                <span class="material-icons text-4xl text-gray-400 mb-2 block">cloud_upload</span>
+                                <p class="text-gray-600">Kattints ide vagy húzd ide a képeket</p>
+                                <p class="text-sm text-gray-500 mt-1">Támogatott formátumok: JPG, PNG, GIF (max. 10MB/kép)</p>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Current Images -->
+                    <div x-show="propertyImages.length > 0" class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Jelenlegi képek 
+                            <span class="text-gray-500 font-normal">(húzd át a sorrendhez)</span>
+                        </label>
+                        <div id="imageGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                            <template x-for="(image, index) in propertyImages" :key="image.id || index">
+                                <div class="image-preview relative cursor-move" :data-id="image.id || index">
+                                    <img :src="image.image_path" :alt="'Property image ' + (index + 1)" 
+                                         class="w-full h-32 object-cover">
+                                    
+                                    <!-- Drag Handle -->
+                                    <div class="drag-handle">
+                                        <span class="material-icons text-gray-600 text-sm">drag_indicator</span>
+                                    </div>
+                                    
+                                    <!-- Order Number -->
+                                    <div class="image-order" x-text="index + 1"></div>
+                                    
+                                    <!-- Overlay with actions -->
+                                    <div class="image-overlay">
+                                        <button type="button" 
+                                                @click="removeImage(index, image.id)"
+                                                class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+                                                title="Kép törlése">
+                                            <span class="material-icons">delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Upload Progress -->
+                    <div x-show="uploadProgress.show" class="mb-4">
+                        <div class="bg-gray-200 rounded-full h-2">
+                            <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                 :style="'width: ' + uploadProgress.percent + '%'"></div>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1" x-text="uploadProgress.text"></p>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-end space-x-4 pt-6 border-t">
+                    <button type="button" @click="showPropertyForm = false" 
+                            class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                        Mégse
+                    </button>
+                    <button type="submit" :disabled="formLoading" 
+                            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                        <span x-show="!formLoading" x-text="editingProperty ? 'Ingatlan frissítése' : 'Ingatlan létrehozása'"></span>
+                        <span x-show="formLoading">Mentés...</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- QUICK EDIT MODAL -->
+    <div x-show="showQuickEdit" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
+            <div class="p-6 border-b flex items-center justify-between">
+                <h3 class="text-lg font-semibold">Gyors szerkesztés</h3>
+                <button @click="showQuickEdit = false" class="text-gray-400 hover:text-gray-600">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Szekció neve</label>
+                    <p class="text-gray-600" x-text="quickEditData.section_name"></p>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kulcs</label>
+                    <p class="text-sm font-mono text-gray-500" x-text="quickEditData.section_key"></p>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tartalom</label>
+                    <template x-if="quickEditData.content_type === 'html'">
+                        <textarea x-model="quickEditData.content_value" rows="8" 
+                                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                  placeholder="HTML tartalom..."></textarea>
+                    </template>
+                    <template x-if="quickEditData.content_type === 'text'">
+                        <textarea x-model="quickEditData.content_value" rows="4" 
+                                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                  placeholder="Szöveges tartalom..."></textarea>
+                    </template>
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button @click="showQuickEdit = false" 
+                            class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                        Mégse
+                    </button>
+                    <button @click="saveQuickEdit()" :disabled="quickEditLoading" 
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                        <span x-show="!quickEditLoading">Mentés</span>
+                        <span x-show="quickEditLoading">Mentés...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FULL CONTENT FORM MODAL -->
+    <div x-show="showContentForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg max-w-4xl w-full max-h-screen overflow-y-auto">
+            <div class="p-6 border-b flex items-center justify-between">
+                <h3 class="text-lg font-semibold" x-text="editingContent ? 'Tartalom szerkesztése' : 'Új tartalom hozzáadása'"></h3>
+                <button @click="showContentForm = false" class="text-gray-400 hover:text-gray-600">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            
+            <form @submit.prevent="saveContent()" class="p-6 space-y-6">
+                <!-- Basic Information -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Szekció kulcs *</label>
+                        <input type="text" x-model="contentForm.section_key" required 
+                               :disabled="editingContent !== null"
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                               placeholder="pl.: hero_title">
+                        <p class="text-xs text-gray-500 mt-1">Egyedi azonosító, csak szerkesztéskor változtatható</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Szekció neve *</label>
+                        <input type="text" x-model="contentForm.section_name" required 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                               placeholder="pl.: Főcím - Hero szekció">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Oldal *</label>
+                        <select x-model="contentForm.page" required 
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="">Válassz oldalt</option>
+                            <option value="home">Főoldal</option>
+                            <option value="navigation">Navigáció</option>
+                            <option value="contact">Kapcsolat</option>
+                            <option value="footer">Lábléc</option>
+                            <option value="property_detail">Ingatlan részletek</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Szekció csoport</label>
+                        <input type="text" x-model="contentForm.section_group" 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                               placeholder="pl.: hero, about, contact">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Sorrend</label>
+                        <input type="number" x-model="contentForm.display_order" 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                               placeholder="0">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tartalom típusa *</label>
+                    <select x-model="contentForm.content_type" required 
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="text">Szöveg</option>
+                        <option value="html">HTML</option>
+                        <option value="image">Kép</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tartalom *</label>
+                    <template x-if="contentForm.content_type === 'html'">
+                        <textarea x-model="contentForm.content_value" rows="8" required 
+                                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                  placeholder="HTML tartalom..."></textarea>
+                    </template>
+                    <template x-if="contentForm.content_type === 'text'">
+                        <textarea x-model="contentForm.content_value" rows="4" required 
+                                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                  placeholder="Szöveges tartalom..."></textarea>
+                    </template>
+                    <template x-if="contentForm.content_type === 'image'">
+                        <input type="url" x-model="contentForm.content_value" required 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                               placeholder="Kép URL vagy útvonal...">
+                    </template>
+                </div>
+
+                <div class="flex items-center">
+                    <input type="checkbox" x-model="contentForm.is_active" class="mr-2" id="is_active">
+                    <label for="is_active" class="text-sm text-gray-700">Aktív</label>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-end space-x-4 pt-6 border-t">
+                    <button type="button" @click="showContentForm = false" 
+                            class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                        Mégse
+                    </button>
+                    <button type="submit" :disabled="contentFormLoading" 
+                            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                        <span x-show="!contentFormLoading" x-text="editingContent ? 'Tartalom frissítése' : 'Tartalom létrehozása'"></span>
+                        <span x-show="contentFormLoading">Mentés...</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function adminApp() {
+            return {
+                    // Blog Management State
+showBlogForm: false,
+editingBlogPost: null,
+blogFormLoading: false,
+
+// Blog Data
+blogPosts: [],
+blogFilters: {
+    status: '',
+    search: ''
+},
+
+// Blog Form
+blogForm: {
+    title: '',
+    slug: '',
+    excerpt: '',
+    content: '',
+    cover_image: '',
+    status: 'draft',
+    publish_at: '',
+    seo_title: '',
+    seo_description: ''
+},
+
+// Blog Image Upload
+blogImageUpload: {
+    show: false,
+    percent: 0,
+    text: ''
+},
+
+                // Authentication
+                isLoggedIn: false,
+                admin: {},
+                loginForm: {
+                    username: '',
+                    password: ''
+                },
+                loginLoading: false,
+                loginError: '',
+
+                // UI State
+                activeTab: 'dashboard',
+                sidebarOpen: false,
+                showPropertyForm: false,
+                editingProperty: null,
+                formLoading: false,
+
+                // Content Management State
+                showContentForm: false,
+                showQuickEdit: false,
+                editingContent: null,
+                contentFormLoading: false,
+                quickEditLoading: false,
+
+                // Data
+                dashboardStats: {},
+                properties: [],
+                contacts: [],
+                
+                // Content Management Data
+                contentSections: [],
+                contentFilters: {
+                    page: '',
+                    section_group: '',
+                    content_type: ''
+                },
+                availableGroups: [],
+                contentForm: {
+                    section_key: '',
+                    section_name: '',
+                    content_type: 'text',
+                    content_value: '',
+                    page: 'home',
+                    section_group: '',
+                    display_order: 0,
+                    is_active: true
+                },
+                quickEditData: {},
+
+                // UPDATED PROPERTY FORM WITH NEW FIELDS
+                propertyForm: {
+                    title: '',
+                    description: '',
+                    price: '',
+                    status: 'for_sale',
+                    property_id_code: '',
+                    size_ownership_doc: '',
+                    rooms: '',  // NEW FIELD
+                    building_type: '',
+                    city: '',  // RENAMED FROM neighborhood
+                    overall_condition: '',
+                    view: '',
+                    building_material: '',
+                    furnished: false,
+                    garden: false,
+                    terrace: false,
+                    parking: false,
+                    airbnb_suitable: false,
+                    utilities: false,
+                    wheelchair_access: false,
+                    insulation: false
+                },
+
+                // Image management
+                propertyImages: [],
+                uploadProgress: {
+                    show: false,
+                    percent: 0,
+                    text: ''
+                },
+                imagesToDelete: [],
+                sortableInstance: null,
+
+                init() {
+                    this.checkAuth();
+                },
+
+                // HELPER FUNCTIONS FOR NEW LABELS
+                getStatusLabel(status) {
+    const statusLabels = {
+        'for_sale': 'Eladó',
+        'sold': 'Elkelt'
+    };
+    return statusLabels[status] || status;
+},
+
+getBuildingTypeLabel(type) {
+    const typeLabels = {
+        'apartment': 'Lakás / Apartman',
+        'house': 'Villa / Ház / Ikerház',
+        'new_build_villa': 'Új építésű villa',
+        'new_build_apartment': 'Új építésű apartman'
+    };
+    return typeLabels[type] || type;
+},
+
+// Updated validation function
+validatePropertyForm() {
+    const errors = [];
+    
+    // Required fields
+    if (!this.propertyForm.title) {
+        errors.push('Cím megadása kötelező');
+    }
+    
+    if (!this.propertyForm.price || this.propertyForm.price <= 0) {
+        errors.push('Érvényes ár megadása kötelező');
+    }
+    
+    if (!this.propertyForm.building_type) {
+        errors.push('Ingatlantípus kiválasztása kötelező');
+    }
+    
+    if (!this.propertyForm.status) {
+        errors.push('Státusz kiválasztása kötelező');
+    }
+    
+    if (!this.propertyForm.city) {
+        errors.push('Település kiválasztása kötelező');
+    }
+    
+    // Validate building type
+    const validTypes = ['apartment', 'house', 'new_build_villa', 'new_build_apartment'];
+    if (this.propertyForm.building_type && !validTypes.includes(this.propertyForm.building_type)) {
+        errors.push('Érvénytelen ingatlantípus');
+    }
+    
+    // Validate status
+    const validStatuses = ['for_sale'];
+    if (this.propertyForm.status && !validStatuses.includes(this.propertyForm.status)) {
+        errors.push('Érvénytelen státusz');
+    }
+    
+    // Validate city
+    const validCities = ['Alicante', 'Benidorm', 'Denia', 'Calpe', 'Altea', 'Torrevieja', 'Finestrat'];
+    if (this.propertyForm.city && !validCities.includes(this.propertyForm.city)) {
+        errors.push('Érvénytelen település');
+    }
+    
+    return errors;
+},
+
+                async checkAuth() {
+                    const adminData = localStorage.getItem('admin');
+                    if (adminData) {
+                        this.admin = JSON.parse(adminData);
+                        this.isLoggedIn = true;
+                        this.loadDashboard();
+                    }
+                },
+
+                async login() {
+                    this.loginLoading = true;
+                    this.loginError = '';
+
+                    try {
+                        const response = await fetch('api/login.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(this.loginForm)
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok) {
+                            this.admin = data.admin;
+                            this.isLoggedIn = true;
+                            localStorage.setItem('admin', JSON.stringify(this.admin));
+                            this.loginForm = { username: '', password: '' };
+                            this.loadDashboard();
+                        } else {
+                            this.loginError = data.message || 'Hibás felhasználónév vagy jelszó.';
+                        }
+                    } catch (error) {
+                        this.loginError = 'Sikertelen bejelentkezés. Próbáld újra.';
+                    }
+
+                    this.loginLoading = false;
+                },
+
+                async logout() {
+                    try {
+                        await fetch('api/logout.php', { method: 'POST' });
+                    } catch (error) {
+                        console.error('Logout error:', error);
+                    }
+
+                    this.isLoggedIn = false;
+                    this.admin = {};
+                    localStorage.removeItem('admin');
+                },
+
+                setActiveTab(tab) {
+                    this.activeTab = tab;
+                    this.sidebarOpen = false;
+
+                    switch(tab) {
+                        case 'dashboard':
+                            this.loadDashboard();
+                            break;
+                        case 'properties':
+                            this.loadProperties();
+                            break;
+                        case 'contacts':
+                            this.loadContacts();
+                            break;
+                        case 'content':
+                            this.loadContentSections();
+                            break;
+                        case 'blog':
+                            this.loadBlogPosts();
+                            break;
+                    }
+                },
+
+                getTabTitle() {
+    const titles = {
+        dashboard: 'Vezérlőpult',
+        properties: 'Ingatlanok',
+        contacts: 'Kapcsolati üzenetek',
+        content: 'Tartalom kezelés',
+        blog: 'Blog kezelés'
+    };
+    return titles[this.activeTab] || 'Admin felület';
+},
+
+                async loadDashboard() {
+                    try {
+                        const response = await fetch('api/dashboard.php');
+                        if (response.ok) {
+                            this.dashboardStats = await response.json();
+                        }
+                    } catch (error) {
+                        console.error('Error loading dashboard:', error);
+                    }
+                },
+
+                async loadProperties() {
+                    try {
+                        const response = await fetch('api/properties.php');
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.properties = data.properties || [];
+                        }
+                    } catch (error) {
+                        console.error('Error loading properties:', error);
+                    }
+                },
+
+                async loadContacts() {
+                    try {
+                        const response = await fetch('api/contacts.php');
+                        if (response.ok) {
+                            this.contacts = await response.json();
+                        }
+                    } catch (error) {
+                        console.error('Error loading contacts:', error);
+                    }
+                },
+
+                // CONTENT MANAGEMENT METHODS
+                async loadContentSections() {
+                    try {
+                        let url = 'api/content.php?';
+                        const params = new URLSearchParams();
+                        
+                        if (this.contentFilters.page) {
+                            params.append('page', this.contentFilters.page);
+                        }
+                        if (this.contentFilters.section_group) {
+                            params.append('section_group', this.contentFilters.section_group);
+                        }
+                        
+                        const response = await fetch(url + params.toString());
+                        if (response.ok) {
+                            let data = await response.json();
+                            
+                            if (this.contentFilters.content_type) {
+                                data = data.filter(item => item.content_type === this.contentFilters.content_type);
+                            }
+                            
+                            this.contentSections = data;
+                            this.loadAvailableGroups();
+                        }
+                    } catch (error) {
+                        console.error('Error loading content sections:', error);
+                    }
+                },
+
+                async loadAvailableGroups() {
+                    try {
+                        const uniqueGroups = [...new Set(this.contentSections.map(item => item.section_group).filter(group => group))];
+                        this.availableGroups = uniqueGroups.sort();
+                    } catch (error) {
+                        console.error('Error loading groups:', error);
+                    }
+                },
+
+                resetContentForm() {
+                    this.contentForm = {
+                        section_key: '',
+                        section_name: '',
+                        content_type: 'text',
+                        content_value: '',
+                        page: 'home',
+                        section_group: '',
+                        display_order: 0,
+                        is_active: true
+                    };
+                },
+
+                editContent(content) {
+                    this.editingContent = content;
+                    this.contentForm = { ...content };
+                    this.contentForm.is_active = content.is_active == 1;
+                    this.showContentForm = true;
+                },
+
+                quickEditContent(content) {
+                    this.quickEditData = { ...content };
+                    this.showQuickEdit = true;
+                },
+
+                async saveContent() {
+                    this.contentFormLoading = true;
+                    
+                    try {
+                        const url = this.editingContent 
+                            ? `api/content.php?id=${this.editingContent.id}`
+                            : 'api/content.php';
+                        
+                        const method = this.editingContent ? 'PUT' : 'POST';
+
+                        const response = await fetch(url, {
+                            method: method,
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(this.contentForm)
+                        });
+
+                        if (response.ok) {
+                            this.showContentForm = false;
+                            this.loadContentSections();
+                            alert(this.editingContent ? 'Tartalom sikeresen frissítve!' : 'Tartalom sikeresen létrehozva!');
+                        } else {
+                            const data = await response.json();
+                            alert('Hiba: ' + (data.message || 'Ismeretlen hiba.'));
+                        }
+                    } catch (error) {
+                        alert('Hiba történt a mentéskor. Próbáld újra.');
+                    }
+                    
+                    this.contentFormLoading = false;
+                },
+
+                async saveQuickEdit() {
+                    this.quickEditLoading = true;
+                    
+                    try {
+                        const response = await fetch(`api/content.php?section_key=${this.quickEditData.section_key}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                content_value: this.quickEditData.content_value,
+                                content_type: this.quickEditData.content_type
+                            })
+                        });
+
+                        if (response.ok) {
+                            this.showQuickEdit = false;
+                            this.loadContentSections();
+                            alert('Tartalom sikeresen frissítve!');
+                        } else {
+                            const data = await response.json();
+                            alert('Hiba: ' + (data.message || 'Ismeretlen hiba.'));
+                        }
+                    } catch (error) {
+                        alert('Hiba történt a mentéskor. Próbáld újra.');
+                    }
+                    
+                    this.quickEditLoading = false;
+                },
+
+                async deleteContent(id) {
+                    if (!confirm('Biztosan törlöd ezt a tartalmat?')) {
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`api/content.php?id=${id}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (response.ok) {
+                            this.loadContentSections();
+                            alert('Tartalom sikeresen törölve!');
+                        } else {
+                            alert('Hiba a tartalom törlésekor.');
+                        }
+                    } catch (error) {
+                        alert('Hiba történt a tartalom törlésekor. Próbáld újra.');
+                    }
+                },
+
+                async exportContent() {
+                    try {
+                        const response = await fetch('api/content.php');
+                        if (response.ok) {
+                            const data = await response.json();
+                            const dataStr = JSON.stringify(data, null, 2);
+                            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                            
+                            const link = document.createElement('a');
+                            link.href = URL.createObjectURL(dataBlob);
+                            link.download = 'website_content_' + new Date().toISOString().split('T')[0] + '.json';
+                            link.click();
+                        }
+                    } catch (error) {
+                        alert('Hiba az exportálásnál.');
+                    }
+                },
+
+                resetPropertyForm() {
+    this.propertyForm = {
+        title: '',
+        description: '',
+        price: '',
+        status: 'for_sale',
+        property_id_code: '',
+        size_ownership_doc: '',
+        rooms: '',
+        building_type: '',
+        city: '',
+        overall_condition: '',
+        view: '',
+        building_material: '',
+        furnished: false,
+        garden: false,
+        terrace: false,
+        parking: false,
+        airbnb_suitable: false,
+        utilities: false,
+        wheelchair_access: false,
+        insulation: false
+    };
+    this.propertyImages = [];
+    this.imagesToDelete = [];
+    this.destroySortable();
+                },
+
+                async editProperty(property) {
+                    this.editingProperty = property;
+                    
+                    // Copy property data and handle backward compatibility
+                    this.propertyForm = { ...property };
+                    
+                    // Handle field mapping for backward compatibility
+                    if (property.neighborhood && !property.city) {
+                        this.propertyForm.city = property.neighborhood;
+                    }
+                    
+                    // Ensure boolean fields are properly handled
+                    ['furnished', 'garden', 'terrace', 'parking', 'airbnb_suitable', 'utilities', 'wheelchair_access', 'insulation'].forEach(field => {
+                        this.propertyForm[field] = property[field] == 1 || property[field] === true;
+                    });
+                    
+                    await this.loadPropertyImages(property.id);
+                    
+                    this.showPropertyForm = true;
+                    
+                    setTimeout(() => {
+                        this.initSortable();
+                    }, 100);
+                },
+
+                async loadPropertyImages(propertyId) {
+                    try {
+                        const response = await fetch(`api/images.php?property_id=${propertyId}`);
+                        if (response.ok) {
+                            this.propertyImages = await response.json();
+                        }
+                    } catch (error) {
+                        console.error('Error loading property images:', error);
+                    }
+                },
+
+                initSortable() {
+                    this.destroySortable();
+                    const grid = document.getElementById('imageGrid');
+                    if (grid && this.propertyImages.length > 0) {
+                        this.sortableInstance = Sortable.create(grid, {
+                            animation: 150,
+                            ghostClass: 'sortable-ghost',
+                            chosenClass: 'sortable-chosen',
+                            onEnd: (evt) => {
+                                this.reorderImages(evt.oldIndex, evt.newIndex);
+                            }
+                        });
+                    }
+                },
+
+                destroySortable() {
+                    if (this.sortableInstance) {
+                        this.sortableInstance.destroy();
+                        this.sortableInstance = null;
+                    }
+                },
+
+                reorderImages(oldIndex, newIndex) {
+                    const movedImage = this.propertyImages.splice(oldIndex, 1)[0];
+                    this.propertyImages.splice(newIndex, 0, movedImage);
+                },
+
+                async handleImageUpload(event) {
+                    const files = Array.from(event.target.files);
+                    if (files.length === 0) return;
+
+                    this.uploadProgress.show = true;
+                    this.uploadProgress.percent = 0;
+                    this.uploadProgress.text = 'Képek feltöltése...';
+
+                    const formData = new FormData();
+                    files.forEach(file => {
+                        formData.append('images[]', file);
+                    });
+
+                    try {
+                        const response = await fetch('api/upload_temp.php', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            result.files.forEach(filePath => {
+                                this.propertyImages.push({
+                                    image_path: filePath,
+                                    is_new: true
+                                });
+                            });
+
+                            this.uploadProgress.percent = 100;
+                            this.uploadProgress.text = 'Feltöltés kész!';
+
+                            setTimeout(() => {
+                                this.uploadProgress.show = false;
+                                this.initSortable();
+                            }, 1000);
+                        } else {
+                            throw new Error('Upload failed');
+                        }
+                    } catch (error) {
+                        console.error('Upload error:', error);
+                        alert('Hiba a képek feltöltésekor. Próbáld újra.');
+                        this.uploadProgress.show = false;
+                    }
+
+                    event.target.value = '';
+                },
+
+                async removeImage(index, imageId) {
+                    if (confirm('Biztosan törlöd ezt a képet?')) {
+                        if (imageId) {
+                            this.imagesToDelete.push(imageId);
+                        }
+                        this.propertyImages.splice(index, 1);
+                        this.initSortable();
+                    }
+                },
+
+                async saveProperty() {
+                    this.formLoading = true;
+
+                    // Validate form
+                    const errors = this.validatePropertyForm();
+                    if (errors.length > 0) {
+                        alert('Hibák:\n' + errors.join('\n'));
+                        this.formLoading = false;
+                        return;
+                    }
+
+                    try {
+                        const url = this.editingProperty 
+                            ? `api/properties.php?id=${this.editingProperty.id}`
+                            : 'api/properties.php';
+                        
+                        const method = this.editingProperty ? 'PUT' : 'POST';
+
+                        // Prepare data with new field structure
+                        const formData = { ...this.propertyForm };
+                        
+                        // Convert empty strings to null for numeric fields
+                        if (formData.rooms === '') formData.rooms = null;
+                        if (formData.size_ownership_doc === '') formData.size_ownership_doc = null;
+                        if (formData.price === '') formData.price = null;
+
+                        const response = await fetch(url, {
+                            method: method,
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(formData)
+                        });
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            const propertyId = this.editingProperty ? this.editingProperty.id : result.id;
+
+                            await this.updatePropertyImages(propertyId);
+
+                            this.showPropertyForm = false;
+                            this.loadProperties();
+                            this.loadDashboard();
+                            alert(this.editingProperty ? 'Ingatlan sikeresen frissítve!' : 'Ingatlan sikeresen létrehozva!');
+                        } else {
+                            const data = await response.json();
+                            alert('Hiba: ' + (data.message || 'Ismeretlen hiba.'));
+                        }
+                    } catch (error) {
+                        alert('Hiba történt a mentéskor. Próbáld újra.');
+                    }
+
+                    this.formLoading = false;
+                },
+
+                async updatePropertyImages(propertyId) {
+                    try {
+                        if (this.imagesToDelete.length > 0) {
+                            await fetch('api/images.php', {
+                                method: 'DELETE',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ image_ids: this.imagesToDelete })
+                            });
+                        }
+
+                        const imageUpdates = this.propertyImages.map((image, index) => ({
+                            id: image.id || null,
+                            property_id: propertyId,
+                            image_path: image.image_path,
+                            image_order: index + 1,
+                            is_new: image.is_new || false
+                        }));
+
+                        await fetch('api/images.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                property_id: propertyId,
+                                images: imageUpdates
+                            })
+                        });
+
+                    } catch (error) {
+                        console.error('Error updating images:', error);
+                    }
+                },
+
+                async deleteProperty(id) {
+                    if (!confirm('Biztosan törlöd ezt az ingatlant?')) {
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`api/properties.php?id=${id}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (response.ok) {
+                            this.loadProperties();
+                            this.loadDashboard();
+                            alert('Ingatlan sikeresen törölve!');
+                        } else {
+                            alert('Hiba az ingatlan törlésekor.');
+                        }
+                    } catch (error) {
+                        alert('Hiba történt az ingatlan törlésekor. Próbáld újra.');
+                    }
+                },
+
+                getBlogStatusLabel(status) {
+                    const statusLabels = {
+                        'draft': 'Piszkozat',
+                        'published': 'Publikált',
+                        'scheduled': 'Ütemezett'
+                    };
+                    return statusLabels[status] || status;
+                },
+
+                // Generate slug from title
+                generateSlug() {
+                    if (!this.blogForm.title) return;
+                    
+                    // Convert Hungarian characters
+                    const hungarian = ['á', 'é', 'í', 'ó', 'ö', 'ő', 'ú', 'ü', 'ű', 'Á', 'É', 'Í', 'Ó', 'Ö', 'Ő', 'Ú', 'Ü', 'Ű'];
+                    const latin = ['a', 'e', 'i', 'o', 'o', 'o', 'u', 'u', 'u', 'A', 'E', 'I', 'O', 'O', 'O', 'U', 'U', 'U'];
+                    let title = this.blogForm.title;
+                    
+                    for (let i = 0; i < hungarian.length; i++) {
+                        title = title.replaceAll(hungarian[i], latin[i]);
+                    }
+                    
+                    // Create slug
+                    this.blogForm.slug = title
+                        .toLowerCase()
+                        .trim()
+                        .replace(/[^a-z0-9-]+/g, '-')
+                        .replace(/^-+|-+$/g, '');
+                },
+
+                // Reset blog form
+                resetBlogForm() {
+                    this.blogForm = {
+                        title: '',
+                        slug: '',
+                        excerpt: '',
+                        content: '',
+                        cover_image: '',
+                        status: 'draft',
+                        publish_at: new Date().toISOString().slice(0, 16),
+                        seo_title: '',
+                        seo_description: ''
+                    };
+                },
+
+                // Load blog posts
+                async loadBlogPosts() {
+                    try {
+                        const params = new URLSearchParams();
+                        if (this.blogFilters.status) {
+                            params.append('status', this.blogFilters.status);
+                        }
+                        if (this.blogFilters.search) {
+                            params.append('search', this.blogFilters.search);
+                        }
+
+                        const response = await fetch(`api/blog_admin.php?${params}`);
+                        if (response.ok) {
+                            this.blogPosts = await response.json();
+                        }
+                    } catch (error) {
+                        console.error('Error loading blog posts:', error);
+                    }
+                },
+
+                // Edit blog post
+                editBlogPost(post) {
+                    this.editingBlogPost = post;
+                    this.blogForm = { ...post };
+                    
+                    // Format datetime for input
+                    if (this.blogForm.publish_at) {
+                        this.blogForm.publish_at = new Date(this.blogForm.publish_at).toISOString().slice(0, 16);
+                    }
+                    
+                    this.showBlogForm = true;
+                },
+
+                // Save blog post
+                async saveBlogPost() {
+                    this.blogFormLoading = true;
+                    
+                    try {
+                        const url = this.editingBlogPost 
+                            ? `api/blog_save.php?id=${this.editingBlogPost.id}`
+                            : 'api/blog_save.php';
+                        
+                        const method = this.editingBlogPost ? 'PUT' : 'POST';
+
+                        const response = await fetch(url, {
+                            method: method,
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(this.blogForm)
+                        });
+
+                        if (response.ok) {
+                            this.showBlogForm = false;
+                            this.loadBlogPosts();
+                            alert(this.editingBlogPost ? 'Blogbejegyzés sikeresen frissítve!' : 'Blogbejegyzés sikeresen létrehozva!');
+                        } else {
+                            const data = await response.json();
+                            alert('Hiba: ' + (data.message || 'Ismeretlen hiba.'));
+                        }
+                    } catch (error) {
+                        console.error('Error saving blog post:', error);
+                        alert('Hiba történt a mentéskor. Próbáld újra.');
+                    }
+                    
+                    this.blogFormLoading = false;
+                },
+
+                // Delete blog post
+                async deleteBlogPost(id) {
+                    if (!confirm('Biztosan törlöd ezt a blogbejegyzést?')) {
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`api/blog_admin.php?id=${id}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (response.ok) {
+                            this.loadBlogPosts();
+                            alert('Blogbejegyzés sikeresen törölve!');
+                        } else {
+                            alert('Hiba a blogbejegyzés törlésekor.');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting blog post:', error);
+                        alert('Hiba történt a blogbejegyzés törlésekor. Próbáld újra.');
+                    }
+                },
+
+                // Handle blog image upload
+                async handleBlogImageUpload(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    this.blogImageUpload.show = true;
+                    this.blogImageUpload.percent = 0;
+                    this.blogImageUpload.text = 'Kép feltöltése...';
+
+                    const formData = new FormData();
+                    formData.append('image', file);
+
+                    try {
+                        const response = await fetch('api/blog_upload.php', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            this.blogForm.cover_image = result.url;
+                            
+                            this.blogImageUpload.percent = 100;
+                            this.blogImageUpload.text = 'Feltöltés kész!';
+
+                            setTimeout(() => {
+                                this.blogImageUpload.show = false;
+                            }, 1000);
+                        } else {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Upload failed');
+                        }
+                    } catch (error) {
+                        console.error('Upload error:', error);
+                        alert('Hiba a kép feltöltésekor: ' + error.message);
+                        this.blogImageUpload.show = false;
+                    }
+
+                    event.target.value = '';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Blogbejegyzés - Best Homes Espana</title>
+    <meta name="description" id="page-description" content="Olvasd el a legfrissebb híreket és tippeket a Costa Blanca ingatlanpiacáról.">
+    <meta name="keywords" content="Costa Blanca blog, ingatlan hírek, ingatlanpiac, befektetési tanácsok, Best Homes Espana">
+    <link rel="canonical" id="page-canonical" href="https://besthomesespana.com/blog-detail.html">
+
+    <!-- Open Graph -->
+    <meta property="og:title" id="og-title" content="Blogbejegyzés - Best Homes Espana">
+    <meta property="og:description" id="og-description" content="Szakértői tanácsok és hírek a Costa Blanca ingatlanpiacáról">
+    <meta property="og:image" id="og-image" content="https://besthomesespana.com/images/hero.jpg">
+    <meta property="og:url" id="og-url" content="https://besthomesespana.com/blog-detail.html">
+    <meta property="og:type" content="article">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" id="twitter-title" content="Blogbejegyzés - Best Homes Espana">
+    <meta name="twitter:description" id="twitter-description" content="Szakértői tanácsok és hírek a Costa Blanca ingatlanpiacáról">
+    <meta name="twitter:image" id="twitter-image" content="https://besthomesespana.com/images/main1.jpg">
+    
+    <!-- JSON-LD Schema -->
+    <script type="application/ld+json" id="json-ld-schema">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Blogbejegyzés",
+        "description": "Szakértői tanácsok és hírek a Costa Blanca ingatlanpiacáról",
+        "author": {
+            "@type": "Organization",
+            "name": "Best Homes Espana"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Best Homes Espana",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://besthomesespana.com/images/logo.jpg"
+            }
+        },
+        "datePublished": "2025-01-01",
+        "dateModified": "2025-01-01",
+        "image": "https://besthomesespana.com/images/hero.jpg"
+    }
+    </script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        .navbar-scroll {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.6s ease;
+        }
+        
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .blog-content {
+            line-height: 1.8;
+        }
+
+        .blog-content h1, .blog-content h2, .blog-content h3 {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .blog-content h1 {
+            font-size: 2rem;
+            color: #1e40af;
+        }
+
+        .blog-content h2 {
+            font-size: 1.5rem;
+            color: #1e40af;
+        }
+
+        .blog-content h3 {
+            font-size: 1.25rem;
+            color: #374151;
+        }
+
+        .blog-content p {
+            margin-bottom: 1.5rem;
+            color: #374151;
+        }
+
+        .blog-content ul, .blog-content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .blog-content li {
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        .blog-content blockquote {
+            border-left: 4px solid #3b82f6;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+            color: #6b7280;
+        }
+
+        .blog-content img {
+            border-radius: 0.5rem;
+            margin: 1.5rem 0;
+            width: 100%;
+            height: auto;
+        }
+
+        .blog-content a {
+            color: #3b82f6;
+            text-decoration: underline;
+        }
+
+        .blog-content a:hover {
+            color: #1d4ed8;
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-800">
+    
+    <!-- Navigation -->
+    <nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-300" x-data="{ open: false }">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-2xl font-bold text-blue-600">Best Homes Espana</h1>
+                </div>
+                
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="index.html" class="hover:text-blue-600 transition-colors">Főoldal</a>
+                        <a href="index.html#properties" class="hover:text-blue-600 transition-colors">Ingatlanok</a>
+                        <a href="index.html#costa-blanca" class="hover:text-blue-600 transition-colors">Costa Blanca</a>
+                        <a href="index.html#about" class="hover:text-blue-600 transition-colors">Rólunk</a>
+                        <a href="blog.html" class="text-blue-600 font-medium">Blog</a>
+                        <a href="index.html#contact" class="hover:text-blue-600 transition-colors">Kapcsolat</a>
+                    </div>
+                </div>
+                
+                <div class="md:hidden">
+                    <button @click="open = !open" class="text-gray-600 hover:text-blue-600">
+                        <span class="material-icons">menu</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div x-show="open" class="md:hidden bg-white shadow-lg">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="index.html" class="block px-3 py-2 hover:text-blue-600">Főoldal</a>
+                <a href="index.html#properties" class="block px-3 py-2 hover:text-blue-600">Ingatlanok</a>
+                <a href="index.html#costa-blanca" class="block px-3 py-2 hover:text-blue-600">Costa Blanca</a>
+                <a href="index.html#about" class="block px-3 py-2 hover:text-blue-600">Rólunk</a>
+                <a href="blog.html" class="block px-3 py-2 text-blue-600 font-medium">Blog</a>
+                <a href="index.html#contact" class="block px-3 py-2 hover:text-blue-600">Kapcsolat</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-16" x-data="blogDetailPage()" x-init="loadPost()">
+        
+        <!-- Loading State -->
+        <div x-show="loading" class="min-h-screen flex items-center justify-center">
+            <div class="text-center">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p class="mt-4 text-gray-600">Blogbejegyzés betöltése...</p>
+            </div>
+        </div>
+
+        <!-- Error State -->
+        <div x-show="error && !loading" class="min-h-screen flex items-center justify-center">
+            <div class="text-center">
+                <span class="material-icons text-gray-400 text-6xl mb-4">error_outline</span>
+                <h2 class="text-2xl font-semibold text-gray-600 mb-2">Hiba történt</h2>
+                <p class="text-gray-500 mb-6" x-text="errorMessage"></p>
+                <a href="blog.html" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                    Vissza a bloghoz
+                </a>
+            </div>
+        </div>
+
+        <!-- Blog Post Content -->
+        <article x-show="post && !loading && !error" class="fade-in">
+            <!-- Hero Section -->
+            <section class="relative">
+                <img :src="post.cover_image || '/images/main1.jpg'" 
+                     :alt="post.title" 
+                     class="w-full h-96 object-cover">
+                <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-8 text-white">
+                    <div class="max-w-4xl mx-auto">
+                        <div class="flex items-center mb-4">
+                            <span class="bg-blue-600 px-3 py-1 rounded-full text-sm font-medium" x-text="post.publish_date_formatted"></span>
+                        </div>
+                        <h1 class="text-3xl md:text-5xl font-bold mb-4" x-text="post.title"></h1>
+                        <p class="text-xl text-gray-200" x-text="post.excerpt"></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Article Content -->
+            <section class="py-16">
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="prose prose-lg max-w-none blog-content" x-html="post.content"></div>
+                </div>
+            </section>
+
+            <!-- Back to Blog -->
+            <section class="py-12 bg-gray-50">
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <a href="blog.html" class="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                        <span class="material-icons mr-2">arrow_back</span>
+                        Vissza a bloghoz
+                    </a>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
+                <div>
+                    <h3 class="text-2xl font-bold mb-4">Best Homes Espana</h3>
+                    <p class="text-gray-400">A te megbízható ingatlan értékesítőd, Costa Blanca, Spain.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Gyorslinkek</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="index.html" class="hover:text-white">Főoldal</a></li>
+                        <li><a href="index.html#properties" class="hover:text-white">Ingatlanok</a></li>
+                        <li><a href="index.html#about" class="hover:text-white">Rólunk</a></li>
+                        <li><a href="blog.html" class="hover:text-white">Blog</a></li>
+                        <li><a href="index.html#contact" class="hover:text-white">Kapcsolat</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Szolgáltatások</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>Ingatlanértékesítés</li>
+                        <li>Ingatlanbérbeadás</li>
+                        <li>Befektetési tanácsadás</li>
+                        <li>Ingatlankezelés</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Elérhetőségek</h4>
+                    <div class="space-y-2 text-gray-400">
+                        <p>+36706310000</p>
+                        <p>besthomesespana@gmail.com</p>
+                        <p>Benidorm, Spain</p>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Jogi információk</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="./laws/privacy.html" class="hover:text-white">Adatvédelmi irányelvek</a></li>
+                        <li><a href="./laws/cookies.html" class="hover:text-white">Cookie szabályzat</a></li>
+                        <li><a href="./laws/terms.html" class="hover:text-white">Felhasználási feltételek</a></li>
+                        <li><a href="./laws/impresszum.html" class="hover:text-white">Impresszum</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 Best Homes Espana. Minden jog fenntartva.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('navbar-scroll');
+            } else {
+                navbar.classList.remove('navbar-scroll');
+            }
+        });
+
+        // Blog detail page functionality
+        function blogDetailPage() {
+            return {
+                post: null,
+                loading: true,
+                error: false,
+                errorMessage: '',
+
+                async loadPost() {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const slug = urlParams.get('slug');
+
+                    if (!slug) {
+                        this.error = true;
+                        this.errorMessage = 'Nincs megadva blogbejegyzés azonosító.';
+                        this.loading = false;
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`api/blog_detail.php?slug=${encodeURIComponent(slug)}`);
+                        const data = await response.json();
+
+                        if (response.ok) {
+                            this.post = data;
+                            this.updatePageMetadata(data);
+                        } else {
+                            this.error = true;
+                            this.errorMessage = data.message || 'A blogbejegyzés nem található.';
+                        }
+                    } catch (error) {
+                        console.error('Error loading post:', error);
+                        this.error = true;
+                        this.errorMessage = 'Hiba történt a blogbejegyzés betöltésekor.';
+                    }
+
+                    this.loading = false;
+                },
+
+                updatePageMetadata(post) {
+                    // Update page title
+                    const pageTitle = post.seo_title || post.title;
+                    document.title = `${pageTitle} - Best Homes Espana`;
+                    document.getElementById('page-title').textContent = `${pageTitle} - Best Homes Espana`;
+
+                    // Update meta description
+                    const pageDescription = post.seo_description || post.excerpt;
+                    document.getElementById('page-description').setAttribute('content', pageDescription);
+
+                    // Update canonical URL
+                    document.getElementById('page-canonical').setAttribute('href', `https://besthomesespana.com/blog-detail.html?slug=${post.slug}`);
+
+                    // Update Open Graph tags
+                    document.getElementById('og-title').setAttribute('content', pageTitle);
+                    document.getElementById('og-description').setAttribute('content', pageDescription);
+                    document.getElementById('og-url').setAttribute('content', `https://besthomesespana.com/blog-detail.html?slug=${post.slug}`);
+                    
+                    if (post.cover_image) {
+                        const imageUrl = post.cover_image.startsWith('http') ? post.cover_image : `https://besthomesespana.com${post.cover_image}`;
+                        document.getElementById('og-image').setAttribute('content', imageUrl);
+                        document.getElementById('twitter-image').setAttribute('content', imageUrl);
+                    }
+
+                    // Update Twitter Card tags
+                    document.getElementById('twitter-title').setAttribute('content', pageTitle);
+                    document.getElementById('twitter-description').setAttribute('content', pageDescription);
+
+                    // Update JSON-LD schema
+                    const schema = {
+                        "@context": "https://schema.org",
+                        "@type": "Article",
+                        "headline": post.title,
+                        "description": post.excerpt,
+                        "author": {
+                            "@type": "Organization",
+                            "name": "Best Homes Espana"
+                        },
+                        "publisher": {
+                            "@type": "Organization",
+                            "name": "Best Homes Espana",
+                            "logo": {
+                                "@type": "ImageObject",
+                                "url": "https://besthomesespana.com/images/logo.jpg"
+                            }
+                        },
+                        "datePublished": post.publish_at,
+                        "dateModified": post.updated_at,
+                        "image": post.cover_image ? (post.cover_image.startsWith('http') ? post.cover_image : `https://besthomesespana.com${post.cover_image}`) : "https://besthomesespana.com/images/hero.jpg",
+                        "url": `https://besthomesespana.com/blog-detail.html?slug=${post.slug}`
+                    };
+
+                    document.getElementById('json-ld-schema').textContent = JSON.stringify(schema);
+                }
+            }
+        }
+
+        // Scroll reveal animation
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.scroll-reveal').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

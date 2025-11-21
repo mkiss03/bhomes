@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-content="property_detail_breadcrumb">Ingatlan részletek - Best Homes Espana</title>
+    <meta name="description" content="RÃ©szletes informÃ¡ciÃ³k a kivÃ¡lasztott ingatlanrÃ³l Costa BlancÃ¡n">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        .navbar-scroll {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.6s ease;
+        }
+        
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Image Slider Styles */
+        .image-slider {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .slider-container {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+        
+        .slider-image {
+            min-width: 100%;
+            height: 500px;
+            object-fit: cover;
+        }
+        
+        .slider-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 12px;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+            z-index: 10;
+        }
+        
+        .slider-nav:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+        
+        .slider-nav.prev {
+            left: 20px;
+        }
+        
+        .slider-nav.next {
+            right: 20px;
+        }
+        
+        .slider-dots {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+        
+        .slider-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .slider-dot.active {
+            background: white;
+        }
+        
+        .thumbnail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+            margin-top: 16px;
+        }
+        
+        .thumbnail {
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+        
+        .thumbnail:hover,
+        .thumbnail.active {
+            border-color: #3b82f6;
+        }
+        
+        /* Contact Form Styles */
+        .contact-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .feature-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin: 4px;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .slider-image {
+                height: 300px;
+            }
+            
+            .slider-nav {
+                padding: 8px;
+            }
+            
+            .thumbnail-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+            
+            .thumbnail {
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50" x-data="propertyDetail()" x-init="init()">
+    
+    <!-- Navigation -->
+    <nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-300 bg-white shadow-sm" x-data="{ open: false }">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <a href="index.html" class="text-2xl font-bold text-blue-600" data-content="footer_company_name">Best Homes Espana</a>
+                </div>
+                
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="index.html" class="hover:text-blue-600 transition-colors" data-content="nav_home">Főoldal</a>
+                        <a href="index.html#properties" class="hover:text-blue-600 transition-colors" data-content="nav_properties">Ingatlanok</a>
+                        <a href="index.html#costa-blanca" class="hover:text-blue-600 transition-colors" data-content="nav_costa_blanca">Costa Blanca</a>
+                        <a href="index.html#about" class="hover:text-blue-600 transition-colors" data-content="nav_about">Rólunk</a>
+                        <a href="index.html#contact" class="hover:text-blue-600 transition-colors" data-content="nav_contact">Kapcsolat</a>
+                    </div>
+                </div>
+                
+                <div class="md:hidden">
+                    <button @click="open = !open" class="text-gray-600 hover:text-blue-600">
+                        <span class="material-icons">menu</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div x-show="open" class="md:hidden bg-white shadow-lg">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="index.html" class="block px-3 py-2 hover:text-blue-600" data-content="nav_home">Főoldal</a>
+                <a href="index.html#properties" class="block px-3 py-2 hover:text-blue-600" data-content="nav_properties">Ingatlanok</a>
+                <a href="index.html#costa-blanca" class="block px-3 py-2 hover:text-blue-600" data-content="nav_costa_blanca">Costa Blanca</a>
+                <a href="index.html#about" class="block px-3 py-2 hover:text-blue-600" data-content="nav_about">Rólunk</a>
+                <a href="index.html#contact" class="block px-3 py-2 hover:text-blue-600" data-content="nav_contact">Kapcsolat</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Loading State -->
+    <div x-show="loading" class="min-h-screen flex items-center justify-center pt-16">
+        <div class="text-center">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <p class="text-gray-600">Ingatlan adatok betöltése...</p>
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div x-show="error && !loading" class="min-h-screen flex items-center justify-center pt-16">
+        <div class="text-center max-w-md mx-auto px-4">
+            <span class="material-icons text-6xl text-gray-400 mb-4">error_outline</span>
+            <h2 class="text-2xl font-bold mb-4">Ingatlan nem található</h2>
+            <p class="text-gray-600 mb-6">A keresett ingatlan nem elérhető vagy nem létezik.</p>
+            <a href="index.html" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                Vissza a főoldalra
+            </a>
+        </div>
+    </div>
+
+    <!-- Property Detail Content -->
+    <div x-show="!loading && !error && property" class="pt-16">
+        
+        <!-- Breadcrumb -->
+        <div class="bg-white border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <nav class="flex text-sm" aria-label="Breadcrumb">
+                    <a href="index.html" class="text-blue-600 hover:text-blue-700" data-content="nav_home">Főoldal</a>
+                    <span class="mx-2 text-gray-500">/</span>
+                    <a href="index.html#properties" class="text-blue-600 hover:text-blue-700" data-content="nav_properties">Ingatlanok</a>
+                    <span class="mx-2 text-gray-500">/</span>
+                    <span class="text-gray-500" x-text="property?.title || 'Ingatlan részletek'" data-content="property_detail_breadcrumb"></span>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Property Header -->
+        <div class="bg-white border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium mr-4" 
+                                  x-text="getStatusText(property?.status)"></span>
+                            <span class="text-gray-500 text-sm">ID: <span x-text="property?.property_id_code || property?.id"></span></span>
+                        </div>
+                        <h1 class="text-3xl lg:text-4xl font-bold mb-2" x-text="property?.title"></h1>
+                        <div class="flex items-center text-gray-600">
+    <span class="material-icons mr-1">location_on</span>
+    <span x-text="property?.city || property?.neighborhood || 'Nincs megadva'"></span>
+</div>
+                    </div>
+                    <div class="mt-6 lg:mt-0 lg:ml-8">
+                        <div class="text-right">
+                            <div class="text-3xl lg:text-4xl font-bold text-blue-600">
+                                €<span x-text="property?.price ? Number(property.price).toLocaleString() : 0"></span>
+                            </div>
+                            <div class="text-gray-500 text-sm mt-1" x-text="property?.status === 'for_rent' ? 'havonta' : ''"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Left Column - Images and Description -->
+                <div class="lg:col-span-2 space-y-8">
+                    
+                    <!-- Image Slider -->
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden fade-in">
+                        <template x-if="property?.images && property.images.length > 0">
+                            <div class="image-slider relative">
+                                <div class="slider-container" :style="`transform: translateX(-${currentImageIndex * 100}%)`">
+                                    <template x-for="(image, index) in property.images" :key="index">
+                                        <img :src="image" :alt="`Property image ${index + 1}`" class="slider-image">
+                                    </template>
+                                </div>
+                                
+                                <!-- Navigation Arrows -->
+                                <template x-if="property.images.length > 1">
+                                    <div>
+                                        <button @click="previousImage()" class="slider-nav prev">
+                                            <span class="material-icons">chevron_left</span>
+                                        </button>
+                                        <button @click="nextImage()" class="slider-nav next">
+                                            <span class="material-icons">chevron_right</span>
+                                        </button>
+                                    </div>
+                                </template>
+                                
+                                <!-- Dots Indicator -->
+                                <template x-if="property.images.length > 1">
+                                    <div class="slider-dots">
+                                        <template x-for="(image, index) in property.images" :key="index">
+                                            <div class="slider-dot" 
+                                                 :class="{ 'active': index === currentImageIndex }"
+                                                 @click="currentImageIndex = index"></div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                        
+                        <!-- Thumbnail Grid -->
+                        <template x-if="property?.images && property.images.length > 1">
+                            <div class="p-4">
+                                <div class="thumbnail-grid">
+                                    <template x-for="(image, index) in property.images" :key="index">
+                                        <img :src="image" 
+                                             :alt="`Thumbnail ${index + 1}`" 
+                                             class="thumbnail"
+                                             :class="{ 'active': index === currentImageIndex }"
+                                             @click="currentImageIndex = index">
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                        
+                        <!-- No Images Placeholder -->
+                        <template x-if="!property?.images || property.images.length === 0">
+                            <div class="h-96 bg-gray-200 flex items-center justify-center">
+                                <div class="text-center text-gray-500">
+                                    <span class="material-icons text-6xl mb-2">image</span>
+                                    <p data-content="property_detail_no_images">Nincsenek elérhető képek</p>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Property Description -->
+                    <div class="bg-white rounded-lg shadow-lg p-6 scroll-reveal">
+                        <h2 class="text-2xl font-bold mb-4" data-content="property_detail_description_title">Leírás</h2>
+                        <div class="prose max-w-none">
+                            <p class="text-gray-700 leading-relaxed" x-text="property?.description || 'Nincs elérhető leírás ehhez az ingatlanhoz.'"></p>
+                        </div>
+                    </div>
+
+                    <!-- Property Features -->
+                    <div class="bg-white rounded-lg shadow-lg p-6 scroll-reveal">
+                        <h2 class="text-2xl font-bold mb-4" data-content="property_detail_features_title">Jellemzők</h2>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-if="property?.furnished">
+                                <span class="feature-tag bg-blue-100 text-blue-800">
+                                    <span class="material-icons text-sm mr-1">chair</span>
+                                    Bútorozott
+                                </span>
+                            </template>
+                            <template x-if="property?.garden">
+                                <span class="feature-tag bg-green-100 text-green-800">
+                                    <span class="material-icons text-sm mr-1">local_florist</span>
+                                    Kert
+                                </span>
+                            </template>
+                            <template x-if="property?.terrace">
+                                <span class="feature-tag bg-yellow-100 text-yellow-800">
+                                    <span class="material-icons text-sm mr-1">deck</span>
+                                    Terasz
+                                </span>
+                            </template>
+                            <template x-if="property?.parking">
+                                <span class="feature-tag bg-purple-100 text-purple-800">
+                                    <span class="material-icons text-sm mr-1">local_parking</span>
+                                    Parkolás
+                                </span>
+                            </template>
+                            <template x-if="property?.airbnb_suitable">
+                                <span class="feature-tag bg-indigo-100 text-indigo-800">
+                                    <span class="material-icons text-sm mr-1">business</span>
+                                    Airbnb alkalmas
+                                </span>
+                            </template>
+                            <template x-if="property?.utilities">
+                                <span class="feature-tag bg-orange-100 text-orange-800">
+                                    <span class="material-icons text-sm mr-1">build</span>
+                                    Közművek
+                                </span>
+                            </template>
+                            <template x-if="property?.wheelchair_access">
+                                <span class="feature-tag bg-teal-100 text-teal-800">
+                                    <span class="material-icons text-sm mr-1">accessible</span>
+                                    Akadálymentesített
+                                </span>
+                            </template>
+                            <template x-if="property?.insulation">
+                                <span class="feature-tag bg-pink-100 text-pink-800">
+                                    <span class="material-icons text-sm mr-1">ac_unit</span>
+                                    Szigetelés
+                                </span>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column - Details and Contact -->
+                <div class="space-y-6">
+                    
+                    <!-- Replace the property details section -->
+<div class="bg-white rounded-lg shadow-lg p-6 scroll-reveal">
+    <h2 class="text-xl font-bold mb-4" data-content="property_detail_details_title">Ingatlan adatok</h2>
+    <div class="space-y-4">
+        <template x-if="property?.size_ownership_doc">
+            <div class="flex justify-between">
+                <span class="text-gray-600">Alapterület:</span>
+                <span class="font-medium" x-text="property.size_ownership_doc + ' m²'"></span>
+            </div>
+        </template>
+        <template x-if="property?.rooms">
+            <div class="flex justify-between">
+                <span class="text-gray-600">Szobák száma:</span>
+                <span class="font-medium" x-text="property.rooms"></span>
+            </div>
+        </template>
+        <template x-if="property?.building_type">
+            <div class="flex justify-between">
+                <span class="text-gray-600">Épülettípus:</span>
+                <span class="font-medium" x-text="getBuildingTypeText(property.building_type)"></span>
+            </div>
+        </template>
+        <template x-if="property?.city || property?.neighborhood">
+            <div class="flex justify-between">
+                <span class="text-gray-600">Település:</span>
+                <span class="font-medium" x-text="property.city || property.neighborhood"></span>
+            </div>
+        </template>
+        <template x-if="property?.overall_condition">
+            <div class="flex justify-between">
+                <span class="text-gray-600">Állapot:</span>
+                <span class="font-medium" x-text="getConditionText(property.overall_condition)"></span>
+            </div>
+        </template>
+        <template x-if="property?.view">
+            <div class="flex justify-between">
+                <span class="text-gray-600">Kilátás:</span>
+                <span class="font-medium" x-text="property.view"></span>
+            </div>
+        </template>
+    </div>
+</div>
+
+                    <!-- Contact Card -->
+                    <div class="contact-card rounded-lg shadow-lg p-6 scroll-reveal">
+                        <div class="text-center mb-6">
+                            <img src="./images/unnamed.jpg" 
+                                 alt="Balogh Eszter" class="w-20 h-20 rounded-full mx-auto mb-4 object-cover border-4 border-white">
+                            <h3 class="text-xl font-bold" data-content="about_name">Balogh Eszter</h3>
+                            <p class="text-blue-100" data-content="about_title">Ingatlanszakértő</p>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <a href="tel:+36706310000" data-dynamic="true"
+                               class="w-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-3 rounded-lg transition-colors flex items-center justify-center">
+                                <span class="material-icons mr-2">phone</span>
+                                <span data-content="contact_phone">+36 70 631 0000</span>
+                            </a>
+                            <a href="mailto:besthomesespana@gmail.com" data-dynamic="true"
+                               class="w-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-3 rounded-lg transition-colors flex items-center justify-center">
+                                <span class="material-icons mr-2">email</span>
+                                E-mail küldése
+                            </a>
+                        </div>
+                        
+                        <!-- Quick Contact Form -->
+                        <div class="mt-6 pt-6 border-t border-white border-opacity-20" x-data="contactForm()">
+                            <h4 class="font-semibold mb-4" data-content="quick_contact_title">Gyors érdeklődés</h4>
+                            <form @submit.prevent="submitForm()" class="space-y-3">
+                                <input type="text" x-model="form.name" required 
+                                       class="w-full p-3 rounded bg-white bg-opacity-20 placeholder-white text-white border border-white border-opacity-30 focus:border-opacity-50"
+                                       data-placeholder="quick_contact_name_placeholder">
+                                <input type="email" x-model="form.email" required 
+                                       class="w-full p-3 rounded bg-white bg-opacity-20 placeholder-white text-white border border-white border-opacity-30 focus:border-opacity-50"
+                                       data-placeholder="quick_contact_email_placeholder">
+                                <input type="tel" x-model="form.phone" 
+                                       class="w-full p-3 rounded bg-white bg-opacity-20 placeholder-white text-white border border-white border-opacity-30 focus:border-opacity-50"
+                                       data-placeholder="quick_contact_phone_placeholder">
+                                <textarea x-model="form.message" rows="3" required 
+                                          class="w-full p-3 rounded bg-white bg-opacity-20 placeholder-white text-white border border-white border-opacity-30 focus:border-opacity-50"
+                                          data-placeholder="quick_contact_message_placeholder"></textarea>
+                                <button type="submit" :disabled="submitting" 
+                                        class="w-full bg-white text-purple-600 p-3 rounded font-semibold hover:bg-gray-100 transition-colors disabled:opacity-50">
+                                    <span x-show="!submitting" data-content="quick_contact_submit">Küldés</span>
+                                    <span x-show="submitting">Küldés...</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Share Property -->
+                    <div class="bg-white rounded-lg shadow-lg p-6 scroll-reveal">
+                        <h3 class="text-lg font-bold mb-4" data-content="property_detail_share_title">Ingatlan megosztása</h3>
+                        <div class="flex space-x-3">
+                            <button @click="shareProperty('facebook')" 
+                                    class="flex-1 bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition-colors">
+                                Facebook
+                            </button>
+                            <button @click="shareProperty('email')" 
+                                    class="flex-1 bg-gray-600 text-white p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                                E-mail
+                            </button>
+                            <button @click="copyLink()" 
+                                    class="flex-1 bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition-colors">
+                                Link másolása
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-2xl font-bold mb-4" data-content="footer_company_name">Best Homes Espana</h3>
+                    <p class="text-gray-400" data-content="footer_company_desc">A te megbízható ingatlan értékesítőd, Costa Blanca, Spain.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4" data-content="footer_quicklinks_title">Gyorslinkek</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="index.html" class="hover:text-white" data-content="nav_home">Főoldal</a></li>
+                        <li><a href="index.html#properties" class="hover:text-white" data-content="nav_properties">Ingatlanok</a></li>
+                        <li><a href="index.html#about" class="hover:text-white" data-content="nav_about">Rólunk</a></li>
+                        <li><a href="index.html#contact" class="hover:text-white" data-content="nav_contact">Kapcsolat</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4" data-content="footer_services_title">Szolgáltatások</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li data-content="footer_service_1">Ingatlanértékesítés</li>
+                        <li data-content="footer_service_2">Ingatlanbérbeadás</li>
+                        <li data-content="footer_service_3">Befektetési tanácsadás</li>
+                        <li data-content="footer_service_4">Ingatlankezelés</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Elérhetőségek</h4>
+                    <div class="space-y-2 text-gray-400">
+                        <p data-content="contact_phone">+36706310000</p>
+                        <p data-content="contact_email">besthomesespana@gmail.com</p>
+                        <p>Alicante, Spain</p>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p data-content="footer_copyright">&copy; 2025 Best Homes Espana. Minden jog fenntartva.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Get property ID from URL
+        function getPropertyIdFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+
+        // Main Alpine.js component
+        function propertyDetail() {
+            return {
+                property: null,
+                loading: true,
+                error: false,
+                currentImageIndex: 0,
+
+                async init() {
+                    // Load dynamic content first
+                    await contentLoader.loadPageContent('navigation');
+                    await contentLoader.loadPageContent('footer');
+                    await contentLoader.loadPageContent('property_detail');
+                    await contentLoader.loadPageContent('contact');
+                    
+                    const propertyId = getPropertyIdFromURL();
+                    if (!propertyId) {
+                        this.error = true;
+                        this.loading = false;
+                        return;
+                    }
+
+                    await this.loadProperty(propertyId);
+                    this.initScrollReveal();
+                },
+
+                async loadProperty(id) {
+                    try {
+                        const response = await fetch(`api/properties.php?id=${id}`);
+                        if (response.ok) {
+                            this.property = await response.json();
+                            
+                            // Update page title
+                            if (this.property.title) {
+                                document.title = `${this.property.title} - Best Homes Espana`;
+                            }
+                        } else {
+                            this.error = true;
+                        }
+                    } catch (error) {
+                        console.error('Error loading property:', error);
+                        this.error = true;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                // Image slider methods
+                previousImage() {
+                    if (this.property?.images?.length > 0) {
+                        this.currentImageIndex = this.currentImageIndex > 0 
+                            ? this.currentImageIndex - 1 
+                            : this.property.images.length - 1;
+                    }
+                },
+
+                nextImage() {
+                    if (this.property?.images?.length > 0) {
+                        this.currentImageIndex = this.currentImageIndex < this.property.images.length - 1 
+                            ? this.currentImageIndex + 1 
+                            : 0;
+                    }
+                },
+
+                // Updated text formatting methods
+getStatusText(status) {
+    const statusMap = {
+        'for_sale': 'Eladó',
+        'new_build': 'Új építésű',
+        'sold': 'Elkelt'
+    };
+    return statusMap[status] || status;
+},
+
+getBuildingTypeText(type) {
+    const typeMap = {
+        'apartment': 'Lakás / Apartman',
+        'house': 'Villa / Ház / Ikerház'
+    };
+    return typeMap[type] || type;
+},
+
+                getConditionText(condition) {
+                    const conditionMap = {
+                        'excellent': 'Kiváló',
+                        'good': 'Jó',
+                        'fair': 'Közepes',
+                        'needs_renovation': 'Felújítandó'
+                    };
+                    return conditionMap[condition] || condition;
+                },
+
+                // Share functionality
+                shareProperty(platform) {
+                    const url = window.location.href;
+                    const title = this.property?.title || 'Ingatlan';
+                    const text = `Nézd meg ezt az ingatlant: ${title}`;
+
+                    switch(platform) {
+                        case 'facebook':
+                            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+                            break;
+                        case 'email':
+                            window.location.href = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(text + '\n\n' + url)}`;
+                            break;
+                    }
+                },
+
+                async copyLink() {
+                    try {
+                        await navigator.clipboard.writeText(window.location.href);
+                        alert('Link másolva a vágólapra!');
+                    } catch (err) {
+                        console.error('Failed to copy link:', err);
+                        alert('Nem sikerült a link másolása.');
+                    }
+                },
+
+                // Scroll reveal animation
+                initScrollReveal() {
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add('revealed');
+                            }
+                        });
+                    }, { threshold: 0.1 });
+
+                    document.querySelectorAll('.scroll-reveal').forEach(el => {
+                        observer.observe(el);
+                    });
+                }
+            }
+        }
+
+        // Contact form functionality
+        function contactForm() {
+            return {
+                form: {
+                    name: '',
+                    email: '',
+                    phone: '',
+                    message: ''
+                },
+                submitting: false,
+
+                async submitForm() {
+                    this.submitting = true;
+                    
+                    // Add property reference to message
+                    const propertyId = getPropertyIdFromURL();
+                    const propertyTitle = document.querySelector('[x-text="property?.title"]')?.textContent || '';
+                    const enhancedMessage = `Érdeklődés az ingatlannal kapcsolatban:\n` +
+                                          `Ingatlan: ${propertyTitle}\n` +
+                                          `ID: ${propertyId}\n\n` +
+                                          `Üzenet: ${this.form.message}`;
+
+                    try {
+                        const response = await fetch('api/contact.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                ...this.form,
+                                message: enhancedMessage
+                            })
+                        });
+                        
+                        if (response.ok) {
+                            alert('Üzenet sikeresen elküldve!');
+                            this.form = { name: '', email: '', phone: '', message: '' };
+                        } else {
+                            alert('Hiba történt az üzenet küldésekor. Próbáld újra.');
+                        }
+                    } catch (error) {
+                        console.error('Contact form error:', error);
+                        alert('Hiba történt az üzenet küldésekor. Próbáld újra.');
+                    }
+                    
+                    this.submitting = false;
+                }
+            }
+        }
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('navbar-scroll');
+            } else {
+                navbar.classList.remove('navbar-scroll');
+            }
+        });
+
+        // Keyboard navigation for image slider
+        document.addEventListener('keydown', (e) => {
+            const app = Alpine.store || window.Alpine?.store;
+            if (e.key === 'ArrowLeft') {
+                // Trigger previous image (you'll need to access the Alpine component)
+                const event = new CustomEvent('slider-prev');
+                document.dispatchEvent(event);
+            } else if (e.key === 'ArrowRight') {
+                // Trigger next image
+                const event = new CustomEvent('slider-next');
+                document.dispatchEvent(event);
+            }
+        });
+
+        // Handle custom slider events
+        document.addEventListener('slider-prev', () => {
+            // This would need to be properly connected to Alpine
+            console.log('Previous image');
+        });
+
+        document.addEventListener('slider-next', () => {
+            // This would need to be properly connected to Alpine
+            console.log('Next image');
+        });
+
+        // Dynamic Content Loader
+        class ContentLoader {
+            constructor() {
+                this.cache = new Map();
+                this.loading = false;
+            }
+
+            async loadPageContent(page) {
+                if (this.loading) return;
+                
+                try {
+                    this.loading = true;
+                    
+                    if (this.cache.has(page)) {
+                        this.applyContent(this.cache.get(page));
+                        return;
+                    }
+
+                    const response = await fetch(`api/get_content.php?page=${page}&grouped=true`);
+                    if (response.ok) {
+                        const content = await response.json();
+                        this.cache.set(page, content);
+                        this.applyContent(content);
+                    }
+                } catch (error) {
+                    console.error('Error loading page content:', error);
+                } finally {
+                    this.loading = false;
+                }
+            }
+
+            applyContent(groupedContent) {
+                Object.keys(groupedContent).forEach(group => {
+                    const sections = groupedContent[group];
+                    Object.keys(sections).forEach(sectionKey => {
+                        const section = sections[sectionKey];
+                        this.applySingleContent(sectionKey, section);
+                    });
+                });
+            }
+
+            applySingleContent(sectionKey, section) {
+                const elements = document.querySelectorAll(`[data-content="${sectionKey}"]`);
+                
+                elements.forEach(element => {
+                    if (section.content_type === 'html') {
+                        element.innerHTML = section.content_value;
+                    } else {
+                        element.textContent = section.content_value;
+                    }
+                });
+
+                // Handle placeholders
+                if (sectionKey.includes('_placeholder')) {
+                    const inputs = document.querySelectorAll(`[data-placeholder="${sectionKey}"]`);
+                    inputs.forEach(input => {
+                        input.placeholder = section.content_value;
+                    });
+                }
+
+                // Handle contact info
+                if (sectionKey === 'contact_phone') {
+                    const phoneLinks = document.querySelectorAll('a[href^="tel:"][data-dynamic="true"]');
+                    phoneLinks.forEach(link => {
+                        link.href = `tel:${section.content_value}`;
+                    });
+                }
+
+                if (sectionKey === 'contact_email') {
+                    const emailLinks = document.querySelectorAll('a[href^="mailto:"][data-dynamic="true"]');
+                    emailLinks.forEach(link => {
+                        link.href = `mailto:${section.content_value}`;
+                    });
+                }
+            }
+
+            clearCache() {
+                this.cache.clear();
+            }
+        }
+
+        const contentLoader = new ContentLoader();
+
+        function getCurrentPage() {
+            return 'property_detail';
+        }
+
+        // Load content when page loads
+        document.addEventListener('DOMContentLoaded', async () => {
+            await contentLoader.loadPageContent('navigation');
+            await contentLoader.loadPageContent('footer');
+            await contentLoader.loadPageContent('property_detail');
+            await contentLoader.loadPageContent('contact');
+        });
+    </script>
+</body>
+</html>
