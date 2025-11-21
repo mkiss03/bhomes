@@ -13,25 +13,6 @@ class Contact {
 
     public function __construct($db) {
         $this->conn = $db;
-        $this->createTableIfNotExists();
-    }
-
-    // Create contacts table if it doesn't exist
-    private function createTableIfNotExists() {
-        $query = "CREATE TABLE IF NOT EXISTS " . $this->table_name . " (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            name VARCHAR(100) NOT NULL,
-            email VARCHAR(100) NOT NULL,
-            phone VARCHAR(50),
-            message TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )";
-
-        try {
-            $this->conn->exec($query);
-        } catch (PDOException $e) {
-            error_log("Error creating contacts table: " . $e->getMessage());
-        }
     }
 
     // Create new contact message
